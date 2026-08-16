@@ -1,0 +1,21 @@
+{
+  "name": "cc-skills",
+  "owner": {
+    "name": "Tatsuya Kawano",
+    "url": "https://github.com/tatsuya6502"
+  },
+  "metadata": {
+    "description": "Claude Code plugins by Tatsuya Kawano"
+  },
+  "plugins": [
+    {
+      "name": "memory-gc",
+      "source": "./plugins/memory-gc",
+      "description": "Weekly, human-adjudicated maintenance for Claude Code's file-based project memory: a gc/triage pass (memory-gc), promotion of team-sharable knowledge into repo docs (promote-knowledge), and a SessionStart lint hook.",
+      "version": "0.1.0",
+      "author": { "name": "Tatsuya Kawano" },
+      "license": "MIT",
+      "keywords": ["memory", "maintenance", "gc", "knowledge-management"]
+    }
+  ]
+}

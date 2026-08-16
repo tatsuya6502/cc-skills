@@ -1,0 +1,46 @@
+{
+  "skill_name": "memory-gc",
+  "fixture_note": "Canonical fixture lives in evals/fixture-memory/. ALWAYS stage it with evals/fixture-setup.sh <tmp-dir> first — the 90-day-review checks depend on mtimes that setup re-ages. Point the run at the staged copy, never at the canonical fixture.",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "gc-triage",
+      "prompt": "今日は月曜の週次メンテの日という想定で、プロジェクトメモリーの gc（棚卸し）パスを実行してください。（staged fixture メモリーディレクトリ指定・非対話・提案テーブル作成で停止・ファイル変更禁止）",
+      "expected_output": "Triage proposal table covering all planted defects incl. v2 rules (Durable work-log archiving, 90-day 4-way review, PROMOTE nomination); correct KEEP for done-but-pending entry; lesson-extraction proposals; no mutation of the staged fixture.",
+      "files": ["fixture-memory/ via fixture-setup.sh"],
+      "assertions": [
+        "Names project_orphan_fact.md as an orphan (exists but not indexed)",
+        "Flags the dead index link project_ghost.md",
+        "Proposes ARCHIVE for project_done_old_bug.md (fully done 2026-06-20, nothing pending)",
+        "Proposes extracting the regen-certs ⚠️ lesson from project_done_old_bug.md before archiving",
+        "Does NOT propose ARCHIVE for project_done_but_pending_pr.md (recognizes pending PR + prod apply despite the ✅ marker)",
+        "Flags reference_dup_a.md vs reference_dup_b.md as duplicates/contradiction with a MERGE proposal",
+        "Flags the past-due ⏰ license reminder to the user instead of silently archiving it",
+        "Proposes lesson extraction + ARCHIVE (not KEEP/demote) for project_worklog_in_durable.md — work-log project_* may not stay in Durable",
+        "Does NOT propose ARCHIVE/demote for project_team_norms_fact.md (体制 fact exempted via the per-project durable-allowlist.txt)",
+        "Nominates reference_ancient_gotcha.md as PROMOTE (team-sharable technical gotcha, mtime >90d)",
+        "For feedback_old_but_true.md (mtime >90d, personal preference) proposes the still-true refresh (append reviewed: YYYY-MM-DD), not PROMOTE/ARCHIVE",
+        "Staged fixture directory content is unchanged after the run (no files moved/edited)"
+      ]
+    },
+    {
+      "id": 1,
+      "eval_name": "lint-consistency",
+      "prompt": "プロジェクトメモリーに不整合がないか確認してください。（staged fixture メモリーディレクトリ指定・問題を漏れなく列挙・ファイル変更禁止）",
+      "expected_output": "All planted mechanical inconsistencies listed (incl. v2 checks: Durable long line, work-log project_* in Durable, 90-day review-due files); no mutation of the staged fixture.",
+      "files": ["fixture-memory/ via fixture-setup.sh"],
+      "assertions": [
+        "Finds the orphan file project_orphan_fact.md",
+        "Finds the dead index link project_ghost.md",
+        "Finds archive/project_unlisted_archived.md missing from archive/INDEX.md",
+        "Finds the entry misfiled below the '## Archived' section",
+        "Finds the overdue weekly gc (next due was 2026-07-06)",
+        "Finds the Durable index line >160 chars (reference_dup_a.md)",
+        "Finds the work-log project_* resident in Durable (project_worklog_in_durable.md, not project_memory_gc_log.md)",
+        "Does NOT flag project_team_norms_fact.md (exempted via the per-project durable-allowlist.txt)",
+        "Finds the two 90-day review-due files (reference_ancient_gotcha.md, feedback_old_but_true.md)",
+        "Staged fixture directory content is unchanged after the run"
+      ]
+    }
+  ]
+}
