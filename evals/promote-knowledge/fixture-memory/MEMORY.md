@@ -1,8 +1,8 @@
 # Memory Index
 
-## Active — 進行中 (in-progress work)
+## Active — in-progress work
 
-## Backlog & ideas — 未着手・保留
+## Backlog & ideas — not started / on hold
 
 ## Durable — evaluations / lessons / feedback / reference
 

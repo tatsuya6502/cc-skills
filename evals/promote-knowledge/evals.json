@@ -5,7 +5,7 @@
     {
       "id": 0,
       "eval_name": "sharing-filter",
-      "prompt": "memory-gc が PROMOTE ノミネートを出したので、promote-knowledge パスを実行してください。（fixture メモリーディレクトリ指定・対象リポジトリはステージ済みのターゲットリポジトリ・非対話・提案テーブル作成で停止・ファイル変更禁止）",
+      "prompt": "memory-gc has produced PROMOTE nominations — run the promote-knowledge pass. (Use the fixture as the memory dir and the staged target repo as the destination repo; non-interactive; stop after producing the proposal table; modify no files.)",
       "expected_output": "Proposal table: HLS ENDLIST promoted with a scoped destination; GCS SNI and storage-connector default feature dropped as already documented (with cited paths); VM swap and reviewer note rejected at the sharing filter; digest pinning's fact-vs-prescription question engaged explicitly; no file edits.",
       "files": ["fixture-memory/"],
       "assertions": [

@@ -1,13 +1,13 @@
 # Memory Index
 
-## Active — 進行中 (in-progress work)
+## Active — in-progress work
 
 - [Old bug fix](project_done_old_bug.md) — ✅ DONE 2026-06-20; cert renewal bug fixed and deployed.
 - [Retry queue feature](project_done_but_pending_pr.md) — ✅ code done 2026-07-28; PR #421 review wait + prod apply remaining.
 - [Ghost entry](project_ghost.md) — planted dead link.
 - [License reminder](project_license_reminder.md) — ⏰ 2026-07-01 renew the scanner license.
 
-## Backlog & ideas — 未着手・保留
+## Backlog & ideas — not started / on hold
 
 - [GitOps idea](project_idea_gitops.md) — not started; revisit after the August release.
 
@@ -18,7 +18,7 @@
 - [k8s ingress build log](project_worklog_in_durable.md) — work log of the 2026-04 ingress build.
 - [Registry mirror gotcha](reference_ancient_gotcha.md) — registry mirror needs explicit SNI or the TLS handshake fails.
 - [Terse commit feedback](feedback_old_but_true.md) — The user prefers commit bodies under 5 lines.
-- [Review shifts](project_team_norms_fact.md) — two review shifts; ping reviewers only during their shift (allowlisted 体制 fact).
+- [Review shifts](project_team_norms_fact.md) — two review shifts; ping reviewers only during their shift (allowlisted team-process fact).
 - [memory-gc log](project_memory_gc_log.md) — Weekly gc. last run: 2026-06-30; next due: 2026-07-06.
 
 ## Archived

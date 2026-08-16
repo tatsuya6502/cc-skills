@@ -5,7 +5,7 @@
     {
       "id": 0,
       "eval_name": "gc-triage",
-      "prompt": "今日は月曜の週次メンテの日という想定で、プロジェクトメモリーの gc（棚卸し）パスを実行してください。（staged fixture メモリーディレクトリ指定・非対話・提案テーブル作成で停止・ファイル変更禁止）",
+      "prompt": "Assume today is the Monday weekly-maintenance day: run the memory gc (triage) pass over the project memory. (Use the staged fixture as the memory dir; non-interactive; stop after producing the proposal table; modify no files.)",
       "expected_output": "Triage proposal table covering all planted defects incl. v2 rules (Durable work-log archiving, 90-day 4-way review, PROMOTE nomination); correct KEEP for done-but-pending entry; lesson-extraction proposals; no mutation of the staged fixture.",
       "files": ["fixture-memory/ via fixture-setup.sh"],
       "assertions": [
@@ -17,7 +17,7 @@
         "Flags reference_dup_a.md vs reference_dup_b.md as duplicates/contradiction with a MERGE proposal",
         "Flags the past-due ⏰ license reminder to the user instead of silently archiving it",
         "Proposes lesson extraction + ARCHIVE (not KEEP/demote) for project_worklog_in_durable.md — work-log project_* may not stay in Durable",
-        "Does NOT propose ARCHIVE/demote for project_team_norms_fact.md (体制 fact exempted via the per-project durable-allowlist.txt)",
+        "Does NOT propose ARCHIVE/demote for project_team_norms_fact.md (team-process fact exempted via the per-project durable-allowlist.txt)",
         "Nominates reference_ancient_gotcha.md as PROMOTE (team-sharable technical gotcha, mtime >90d)",
         "For feedback_old_but_true.md (mtime >90d, personal preference) proposes the still-true refresh (append reviewed: YYYY-MM-DD), not PROMOTE/ARCHIVE",
         "Staged fixture directory content is unchanged after the run (no files moved/edited)"
@@ -26,7 +26,7 @@
     {
       "id": 1,
       "eval_name": "lint-consistency",
-      "prompt": "プロジェクトメモリーに不整合がないか確認してください。（staged fixture メモリーディレクトリ指定・問題を漏れなく列挙・ファイル変更禁止）",
+      "prompt": "Check the project memory for inconsistencies. (Use the staged fixture as the memory dir; list every problem exhaustively; modify no files.)",
       "expected_output": "All planted mechanical inconsistencies listed (incl. v2 checks: Durable long line, work-log project_* in Durable, 90-day review-due files); no mutation of the staged fixture.",
       "files": ["fixture-memory/ via fixture-setup.sh"],
       "assertions": [
