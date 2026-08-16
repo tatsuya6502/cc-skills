@@ -78,10 +78,11 @@ the doc text as a recommendation with its reason, not a bare command.
 
 ### Step 3 — Deduplicate against existing docs
 
-For each surviving fact, search the canonical team-doc paths before drafting: root `CLAUDE.md`,
-`.claude/rules/`, the component's `README`/`docs/` — scoping any `rg` for the fact's key terms
-to those paths. A match in memory files, eval fixtures, source code, or generated artifacts is
-NOT documentation and never counts as "already documented". Outcomes:
+For each surviving fact, search all canonical team-doc destinations before drafting: the
+applicable root or directory-level `CLAUDE.md` files, `.claude/rules/`, and the component's
+`README`/`docs/` — scoping any `rg` for the fact's key terms to those paths. A match in memory
+files, eval fixtures, source code, or generated artifacts is NOT documentation and never counts
+as "already documented". Outcomes:
 
 - Already documented → drop (note "already in <path>" in the table).
 - Documented but stale/contradicting → propose an UPDATE to that file instead of a new entry.
