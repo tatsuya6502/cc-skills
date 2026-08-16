@@ -25,6 +25,10 @@ unrecoverable, so a person approves every mutation).
   hand-encoding gets this wrong.
 - **Move, never delete.** Archiving = `mv` into `archive/` + a line in `archive/INDEX.md`. Deleting
   a file requires the user's explicit permission for that specific file, every time.
+- **Never overwrite an existing destination.** Files here have no git history, so a clobbered
+  body is gone for good. Before writing an extraction/bundle file or `mv`-ing into `archive/`,
+  check whether the destination path already exists; if it does, stop and propose a merge or a
+  renamed slug instead of writing. Use `mv -n` (no-clobber) for the archive moves.
 - **Markers are hints, not verdicts.** Measured on the 2026-07-12 initial pass: of 33 index lines
   carrying DONE/✅/closed markers, fewer than half were actually archivable — most were
   "✅ done + remaining PR/prod-apply" or carried durable warnings. Always read the body before
@@ -140,7 +144,7 @@ available), output the table as the deliverable and apply nothing.
 Update `project_memory_gc_log.md` (create from the template below if missing) AND its index line.
 The index line must carry both dates — the SessionStart hook and other sessions read it there:
 
-```
+```text
 - [memory-gc log](project_memory_gc_log.md) — Weekly gc (Mondays, manual). last run: YYYY-MM-DD; next due: YYYY-MM-DD. If today > next due, remind the user to run /memory-gc.
 ```
 

@@ -1,6 +1,6 @@
 {
   "skill_name": "memory-gc",
-  "fixture_note": "Canonical fixture lives in evals/fixture-memory/. ALWAYS stage it with evals/fixture-setup.sh <tmp-dir> first — the 90-day-review checks depend on mtimes that setup re-ages. Point the run at the staged copy, never at the canonical fixture.",
+  "fixture_note": "Canonical fixture lives in evals/memory-gc/fixture-memory/. ALWAYS stage it with evals/memory-gc/fixture-setup.sh <tmp-dir> first — the 90-day-review checks depend on mtimes that setup re-ages. Point the run at the staged copy, never at the canonical fixture.",
   "evals": [
     {
       "id": 0,

@@ -6,7 +6,7 @@ Claude Code plugins and skills by [Tatsuya Kawano](https://github.com/tatsuya650
 
 Add this repository as a plugin marketplace, then install the plugins you want:
 
-```
+```text
 /plugin marketplace add tatsuya6502/cc-skills
 /plugin install memory-gc@cc-skills
 ```

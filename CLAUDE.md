@@ -7,7 +7,7 @@ or machine-specific facts.
 
 ## Layout
 
-```
+```text
 .claude-plugin/marketplace.json   # marketplace manifest — lists every plugin
 plugins/<plugin>/                 # one directory per plugin (= the installed payload)
   .claude-plugin/plugin.json      # plugin manifest (name, version, license, ...)

@@ -34,10 +34,20 @@ DURABLE_PROJECT_ALLOWLIST="project_memory_gc_log.md"
 
 MEMDIR="${1:-}"
 if [ -z "$MEMDIR" ]; then
-  # Hook mode: derive the encoded project dir from cwd. Worktree cwds encode to a
-  # non-existent dir (memory lives under the main repo path) — stay silent there.
-  ENC=$(printf '%s' "$PWD" | sed 's|[^A-Za-z0-9]|-|g')
+  # Hook mode: derive the encoded project dir from cwd. Memory lives under the MAIN
+  # repository path (shared by all of its worktrees), so resolve a linked worktree's
+  # cwd to the main worktree root before encoding ("git worktree list" always prints
+  # the main worktree first). Fall back to $PWD outside git.
+  ROOT=$(git worktree list --porcelain 2>/dev/null | head -1 | sed 's/^worktree //')
+  [ -n "$ROOT" ] || ROOT="$PWD"
+  ENC=$(printf '%s' "$ROOT" | sed 's|[^A-Za-z0-9]|-|g')
   MEMDIR="$HOME/.claude/projects/${ENC}/memory"
+  if [ ! -d "$MEMDIR" ] && [ "$ROOT" != "$PWD" ]; then
+    # The registered project may be the cwd itself (e.g. a project rooted in a
+    # subdirectory of the repo) — try the plain cwd encoding before going silent.
+    ENC=$(printf '%s' "$PWD" | sed 's|[^A-Za-z0-9]|-|g')
+    MEMDIR="$HOME/.claude/projects/${ENC}/memory"
+  fi
   [ -d "$MEMDIR" ] || exit 0
 fi
 
@@ -75,6 +85,7 @@ awk '/^## Archived/{a=1;next} a && /^- \[/{print "MEMORY-LINT: entry below Archi
 # 4. Archived files missing from archive/INDEX.md
 if [ -d archive ]; then
   for f in archive/*.md; do
+    [ -f "$f" ] || continue   # unmatched glob leaves the literal 'archive/*.md'
     b=$(basename "$f")
     [ "$b" = "INDEX.md" ] && continue
     grep -qF "($b)" archive/INDEX.md 2>/dev/null || echo "MEMORY-LINT: archived file not in archive/INDEX.md: $b"
@@ -147,8 +158,9 @@ for f in $DURABLE_FILES; do
 done
 [ -n "$due" ] && echo "MEMORY-LINT: Durable review due (mtime >90d, $n file(s); 4-way review at next gc):$due"
 
-# 10. Weekly gc overdue (reads 'next due: YYYY-MM-DD' from the gc log's index line)
-gcdue=$(grep -oE 'next due: [0-9]{4}-[0-9]{2}-[0-9]{2}' MEMORY.md | head -1 | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
+# 10. Weekly gc overdue (reads 'next due: YYYY-MM-DD' from the gc log's index line only —
+#     another entry mentioning "next due:" must not shadow the gc schedule)
+gcdue=$(grep -F 'project_memory_gc_log.md' MEMORY.md | grep -oE 'next due: [0-9]{4}-[0-9]{2}-[0-9]{2}' | head -1 | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
 if [ -n "${gcdue:-}" ] && [ "$TODAY" \> "$gcdue" ]; then
   echo "MEMORY-LINT: weekly memory-gc overdue (next due was $gcdue) — remind the user to run /memory-gc"
 fi

@@ -46,7 +46,8 @@ In priority order:
 
 1. PROMOTE nominations from `project_memory_gc_log.md` (names listed per gc run) that are not
    yet marked promoted.
-2. If asked for a full scan: every Durable `lesson_*` / `reference_*` body, plus `archive/`
+2. If no eligible nominations exist, or the user asks for a full scan: every Durable
+   `lesson_*` / `reference_*` / `feedback_*` body, plus `archive/`
    entries whose INDEX line suggests durable technical content. Delegate bulk body-reading to
    one subagent (Sonnet/Opus) that returns per file: the core fact, environment-generality
    verdict, and any personal/private content it noticed.
@@ -77,8 +78,10 @@ the doc text as a recommendation with its reason, not a bare command.
 
 ### Step 3 — Deduplicate against existing docs
 
-For each surviving fact, search the repo before drafting: root `CLAUDE.md`, `.claude/rules/`,
-the component's `README`/`docs/`, and `rg` for the fact's key terms. Outcomes:
+For each surviving fact, search the canonical team-doc paths before drafting: root `CLAUDE.md`,
+`.claude/rules/`, the component's `README`/`docs/` — scoping any `rg` for the fact's key terms
+to those paths. A match in memory files, eval fixtures, source code, or generated artifacts is
+NOT documentation and never counts as "already documented". Outcomes:
 
 - Already documented → drop (note "already in <path>" in the table).
 - Documented but stale/contradicting → propose an UPDATE to that file instead of a new entry.

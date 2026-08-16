@@ -36,13 +36,14 @@ working-tree edits only — you review the diff and commit yourself.
 ### SessionStart hook
 
 Runs `lint.sh` at session start. With no argument the script derives the memory directory
-from the current working directory and exits silently when none exists, so the hook is a
-no-op in projects without memory. Findings appear as `MEMORY-LINT:` lines. The script always
+from the current working directory — resolving a git worktree to its main repository path,
+since all worktrees share the main repo's memory — and exits silently when none exists, so
+the hook is a no-op in projects without memory. Findings appear as `MEMORY-LINT:` lines. The script always
 exits 0 and never blocks a session.
 
 ## Install
 
-```
+```text
 /plugin marketplace add tatsuya6502/cc-skills
 /plugin install memory-gc@cc-skills
 ```
@@ -56,4 +57,5 @@ your team or its processes work. `lint.sh` itself only knows the universal
 
 ## Requirements
 
-POSIX shell + awk/grep/sed. Tested on Linux (glibc) and macOS (BSD userland).
+Bash plus standard Unix tools (awk / grep / sed / stat / date). Works with both the GNU
+(Linux) and BSD (macOS) userlands; strict-POSIX-only environments are not targeted.

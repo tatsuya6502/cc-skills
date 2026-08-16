@@ -1,6 +1,6 @@
 {
   "skill_name": "promote-knowledge",
-  "fixture_note": "Fixture memory dir in evals/fixture-memory/ contains 6 PROMOTE nominations (gc log) spanning the filter spectrum. Runs are non-interactive: the proposal table is the deliverable and NO repo file may be edited. The dedup-path tests need a target repo whose docs already cover reference_gcs_sni and reference_bc_default_feature — stage one before running (any repo with those two facts planted in its docs works); reference_hls_endlist is fictional and must be absent from the target repo (pure promote-path test).",
+  "fixture_note": "Fixture memory dir in evals/promote-knowledge/fixture-memory/ contains 6 PROMOTE nominations (gc log) spanning the filter spectrum. Runs are non-interactive: the proposal table is the deliverable and NO repo file may be edited. The dedup-path tests need a target repo whose docs already cover reference_gcs_sni and reference_bc_default_feature — stage one before running (any repo with those two facts planted in its docs works); reference_hls_endlist is fictional and must be absent from the target repo (pure promote-path test).",
   "evals": [
     {
       "id": 0,
