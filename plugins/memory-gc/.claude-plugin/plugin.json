@@ -1,0 +1,10 @@
+{
+  "name": "memory-gc",
+  "version": "0.1.0",
+  "description": "Weekly, human-adjudicated maintenance for Claude Code's file-based project memory: a gc/triage pass (memory-gc), promotion of team-sharable knowledge into repo docs (promote-knowledge), and a SessionStart lint hook.",
+  "author": { "name": "Tatsuya Kawano", "url": "https://github.com/tatsuya6502" },
+  "homepage": "https://github.com/tatsuya6502/cc-skills",
+  "repository": "https://github.com/tatsuya6502/cc-skills",
+  "license": "MIT",
+  "keywords": ["memory", "maintenance", "gc", "knowledge-management"]
+}

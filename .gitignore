@@ -1,0 +1,23 @@
+# Local Claude Code state (never publish)
+.claude/
+
+# Sandboxed-Bash transient files (appear only while a sandboxed session runs)
+/.bashrc
+/.bash_profile
+/.zshrc
+/.zprofile
+/.profile
+/.gitconfig
+/.gitmodules
+/.ripgreprc
+/.idea
+/.vscode
+/.mcp.json
+
+# macOS metadata
+.DS_Store
+._*
+
+# Local tool caches
+.symtrace/
+.ast-bro/
