@@ -33,7 +33,10 @@ unrecoverable, so a person approves every mutation).
   carrying DONE/✅/closed markers, fewer than half were actually archivable — most were
   "✅ done + remaining PR/prod-apply" or carried durable warnings. Always read the body before
   proposing anything. Grep can nominate candidates; it cannot adjudicate them.
-- **Index lines stay lean**: English, one line per memory, ideally under ~500 characters. Running
+- **Index lines stay lean**: English, one line per memory, under ~500 characters anywhere in the
+  index. Durable lines are held to a tighter, lint-enforced 160 characters — exempt only when the
+  link title carries `(bundle)` or the link target is in the Durable allowlist (which includes the
+  gc log by default). Active/Backlog lines are not length-checked. Running
   history belongs in the memory body; if an index line has grown into a changelog, first confirm
   the body contains the details (append them if not), then condense the line.
 - **Durable is not a work-log shelf.** A `project_*` memory may sit in Durable only when it
@@ -68,6 +71,12 @@ stays compact — during a gc pass, unpack those lists into per-file triage rows
 a SessionStart hook that runs this script automatically (no argument: it derives the memory dir
 from cwd and stays silent when there is none), so during a gc run this mainly re-confirms state
 before and after applying changes.
+
+Heads-up for the first run on an established memory set: expect a large pass, not a quick lint
+fix. A memory directory that predates this skill has never met the Durable line-length or
+section-budget rules, so the first lint can flag most Durable lines at once — the remedy is a
+full bundling/condensing session (Step 2's MERGE rows and theme bundling below). Subsequent
+weekly runs are small.
 
 ### Step 1 — Metrics
 
