@@ -19,7 +19,7 @@
 - [Registry mirror gotcha](reference_ancient_gotcha.md) — registry mirror needs explicit SNI or the TLS handshake fails.
 - [Terse commit feedback](feedback_old_but_true.md) — The user prefers commit bodies under 5 lines.
 - [Review shifts](project_team_norms_fact.md) — two review shifts; ping reviewers only during their shift (allowlisted team-process fact).
-- [memory-gc log](project_memory_gc_log.md) — Weekly gc. last run: 2026-06-30; next due: 2026-07-06.
+- [memory-gc log](project_memory_gc_log.md) — Weekly gc (Mondays, manual). last run: 2026-06-30; next due: 2026-07-06. If today > next due, remind the user to run /memory-gc.
 
 ## Archived
 

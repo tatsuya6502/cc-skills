@@ -36,6 +36,7 @@
         "Finds the entry misfiled below the '## Archived' section",
         "Finds the overdue weekly gc (next due was 2026-07-06)",
         "Finds the Durable index line >160 chars (reference_dup_a.md)",
+        "Does NOT flag project_memory_gc_log.md for line length (its template-mandated index line exceeds 160 chars but the file is in the built-in Durable allowlist)",
         "Finds the work-log project_* resident in Durable (project_worklog_in_durable.md, not project_memory_gc_log.md)",
         "Does NOT flag project_team_norms_fact.md (exempted via the per-project durable-allowlist.txt)",
         "Finds the two 90-day review-due files (reference_ancient_gotcha.md, feedback_old_but_true.md)",
