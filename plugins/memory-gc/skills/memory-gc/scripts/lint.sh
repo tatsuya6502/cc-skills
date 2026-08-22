@@ -123,7 +123,10 @@ DURABLE_FILES=$(printf '%s\n' "$DURABLE_LINES" | md_links | sort -u)
 long=""
 while IFS= read -r line; do
   [ -n "$line" ] || continue
-  case "$line" in *"(bundle)"*) continue ;; esac
+  title=${line%%"]("*}   # link title = text before the first "](" — "(bundle)" elsewhere in the line must not exempt it
+  if [ "$title" != "$line" ]; then
+    case "$title" in *"(bundle)"*) continue ;; esac
+  fi
   slug=$(printf '%s' "$line" | md_links | head -1)
   if [ -n "$slug" ]; then   # guard: an empty slug must not match allowlist padding
     case " $DURABLE_PROJECT_ALLOWLIST " in

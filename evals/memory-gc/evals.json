@@ -36,6 +36,8 @@
         "Finds the entry misfiled below the '## Archived' section",
         "Finds the overdue weekly gc (next due was 2026-07-06)",
         "Finds the Durable index line >160 chars (reference_dup_a.md)",
+        "Finds the Durable line >160 chars for reference_s3_retry.md — '(bundle)' in the description (not the link title) does not exempt it",
+        "Finds the link-less Durable line >160 chars (reported as <no-link>) — the empty-slug guard must not let it bypass the allowlist",
         "Does NOT flag project_memory_gc_log.md for line length (its template-mandated index line exceeds 160 chars but the file is in the built-in Durable allowlist)",
         "Finds the work-log project_* resident in Durable (project_worklog_in_durable.md, not project_memory_gc_log.md)",
         "Does NOT flag project_team_norms_fact.md (exempted via the per-project durable-allowlist.txt)",
