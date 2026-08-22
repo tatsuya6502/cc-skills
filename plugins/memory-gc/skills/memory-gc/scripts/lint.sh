@@ -115,14 +115,25 @@ DURABLE_LINES=$(awk '/^## Durable/{d=1;next} /^## /{d=0} d && /^- \[/' MEMORY.md
 DURABLE_FILES=$(printf '%s\n' "$DURABLE_LINES" | md_links | sort -u)
 
 # 7. Durable index lines over 160 chars — running-history leaking into the index.
-#    Lines whose link title contains "(bundle)" are exempt: bundle lines must keep every
-#    trigger word of the memories they replaced, so they run long by design.
+#    Two exemptions: lines whose link title contains "(bundle)" (bundle lines must keep every
+#    trigger word of the memories they replaced, so they run long by design), and lines whose
+#    link target is in the Durable project allowlist (those index lines are template-mandated
+#    or user-adjudicated — e.g. the gc-log line must carry both dates plus the reminder
+#    sentence, which alone exceeds 160 chars).
 long=""
 while IFS= read -r line; do
   [ -n "$line" ] || continue
-  case "$line" in *"(bundle)"*) continue ;; esac
+  title=${line%%"]("*}   # link title = text before the first "](" — "(bundle)" elsewhere in the line must not exempt it
+  if [ "$title" != "$line" ]; then
+    case "$title" in *"(bundle)"*) continue ;; esac
+  fi
+  slug=$(printf '%s' "$line" | md_links | head -1)
+  if [ -n "$slug" ]; then   # guard: an empty slug must not match allowlist padding
+    case " $DURABLE_PROJECT_ALLOWLIST " in
+      *" $slug "*) continue ;;
+    esac
+  fi
   if [ "${#line}" -gt 160 ]; then
-    slug=$(printf '%s' "$line" | md_links | head -1)
     long="$long ${slug:-<no-link>}"
   fi
 done <<EOF
