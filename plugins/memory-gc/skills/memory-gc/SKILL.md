@@ -52,21 +52,28 @@ unrecoverable, so a person approves every mutation).
   the *precondition* of the archive, not an alternative to it — once the lessons are out, the
   source body moves to `archive/`. Demoting a work log into Durable is not an escape hatch.
 - **Sandbox note**: Bash writes to the memory dir (mkdir/mv/chmod) fail with "Read-only file
-  system" under the default Bash sandbox — the memory dir is outside its write allowlist. The
-  durable fix is a one-time setup: ask the user to add the memory directories to the sandbox
-  write allowlist in `~/.claude/settings.json`:
+  system" under the default Bash sandbox — the memory dir is outside its write allowlist.
+  The standard remedy is per-run: rerun the failing command with the sandbox disabled, going
+  through the user's normal approval each time. (That rerun exists only while the sandbox's
+  `allowUnsandboxedCommands` escape hatch is enabled — the default; under a strict sandbox
+  it is refused and the user's allowlist entry below is the only path.) If the user asks how
+  to stop these prompts permanently, show them the snippet below with
+  `<encoded-project>/memory` replaced by this session's actual memory dir — the path from
+  the "Memory" section, same rule as above, never derived from cwd — and let them add it to
+  their user-level Claude Code `settings.json` **themselves, outside the session** — never
+  edit `settings.json` for them, and do not propose the edit unprompted:
 
   ```json
-  { "sandbox": { "filesystem": { "allowWrite": ["~/.claude/projects/*/memory"] } } }
+  { "sandbox": { "filesystem": { "allowWrite": ["~/.claude/projects/<encoded-project>/memory"] } } }
   ```
 
-  (Permission rules and the sandbox are separate layers — a `Read(...)`/`Edit(...)` permission
-  rule does not grant sandboxed Bash writes.) Trade-off to state when asking: the wildcard
-  covers every project's memory dir — the same surface the un-sandboxed Write/Edit tools
-  already reach — and since memory files have no git history, a user preferring least
-  privilege can list concrete per-project paths instead. Until the setup is in place, rerun
-  the failing command with the sandbox disabled. The Write/Edit tools are not affected
-  either way.
+  The concrete per-project path is the least-privilege default. A user who runs memory-gc
+  across many projects may prefer the wildcard `~/.claude/projects/*/memory`; if they ask
+  about it, state the trade-off: it widens sandboxed-Bash write access to every project's
+  memory dir — the same surface the un-sandboxed Write/Edit tools already reach, but memory
+  files have no git history. (Permission rules and the sandbox are separate layers — a
+  `Read(...)`/`Edit(...)` permission rule does not grant sandboxed Bash writes.) The
+  Write/Edit tools are not affected either way.
 - **Token economy**: when more than ~10 bodies need reading, delegate the reads to one subagent
   (Sonnet/Opus) that returns per-file: status, pending items (verbatim), durable knowledge,
   archive-safety verdict. Keep the final adjudication in the main session.
@@ -155,8 +162,8 @@ available), output the table as the deliverable and apply nothing.
 
 ### Step 5 — Apply approved rows only
 
-1. `mkdir -p <memory-dir>/archive` and `mv` approved files (needs the sandbox `allowWrite`
-   setup from the ground rules, or the sandbox disabled).
+1. `mkdir -p <memory-dir>/archive` and `mv` approved files (with the sandbox disabled, or
+   covered by the user's own `allowWrite` setup — see the sandbox note in the ground rules).
 2. Append one line per file to `archive/INDEX.md`: `- [Title](file.md) — final state (archived YYYY-MM-DD)`.
 3. Update MEMORY.md: remove archived lines, add extraction lines to Durable, apply approved
    MERGE/UPDATE/section moves. Keep untouched lines verbatim — churn hides real changes.

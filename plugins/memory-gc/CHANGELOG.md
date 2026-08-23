@@ -4,6 +4,17 @@ All notable changes to the memory-gc plugin are documented in this file. The for
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] - 2026-08-23
+
+### Changed
+
+- Hardened the sandbox-setup guidance after a SkillSpector AS1 finding: the
+  `settings.json` allowlist entry is now explicitly a manual change the user makes outside
+  the session (the skill instructs Claude never to edit `settings.json`), the concrete
+  per-project path replaced the wildcard as the least-privilege default recommendation
+  (the wildcard stays documented as a multi-project convenience with its trade-off), and
+  the per-run sandbox-disabled rerun is presented first as the no-setup path.
+
 ## [1.0.0] - 2026-08-23
 
 ### Added
@@ -19,10 +30,10 @@ All notable changes to the memory-gc plugin are documented in this file. The for
 ### Changed
 
 - Sandbox guidance rewritten — the reason for the major bump, since it changes recommended
-  user setup: instead of rerunning memory-dir writes with the sandbox disabled, the skill now
-  asks for a one-time sandbox write-allowlist entry
-  (`"sandbox": {"filesystem": {"allowWrite": ["~/.claude/projects/*/memory"]}}` in
-  `~/.claude/settings.json`). Disabling the sandbox remains the documented fallback.
+  user setup: instead of always rerunning memory-dir writes with the sandbox disabled, the
+  docs now describe a one-time, user-made sandbox write-allowlist entry for the memory
+  directory in the user-level `settings.json`. The per-run sandbox-disabled rerun remains
+  the documented fallback. (Wording further hardened in 1.0.1.)
 - Narrowed natural-language trigger wording to explicit project-memory phrasing, for both
   memory-gc (README) and promote-knowledge (skill description) — addresses the two
   SkillSpector SQP-1 (broad-trigger) findings.
