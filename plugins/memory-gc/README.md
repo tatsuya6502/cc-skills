@@ -75,7 +75,10 @@ recall.
 
 If you run Claude Code with the Bash sandbox enabled, archive moves (`mkdir`/`mv` into the
 memory directory) fail with "Read-only file system" and get rerun with the sandbox disabled
-— a per-run escalation that you approve each time. That default works fine as-is.
+— a per-run escalation that you approve each time. That default works fine as-is. (The
+rerun relies on the sandbox's `allowUnsandboxedCommands` escape hatch, enabled by default;
+in strict sandbox mode the command simply fails, and the allowlist entry below becomes the
+only option.)
 
 If you want to stop those prompts, you can allowlist a project's memory directory for
 sandboxed writes in your user-level `settings.json` (see the
@@ -86,6 +89,11 @@ This is an edit **you make yourself** — the skill instructs Claude never to ed
 ```json
 { "sandbox": { "filesystem": { "allowWrite": ["~/.claude/projects/<encoded-project>/memory"] } } }
 ```
+
+Replace `<encoded-project>` with your project's actual memory directory — Claude prints the
+exact path in the session's "Memory" section, so just ask it. Don't hand-derive the path
+from your project's location: git worktrees, for example, share the main repository's memory
+directory, so a guessed encoding can point at the wrong place.
 
 Listing the concrete paths you actually garbage-collect is the least-privilege choice. A
 wildcard (`~/.claude/projects/*/memory`) also works but widens sandboxed write access to

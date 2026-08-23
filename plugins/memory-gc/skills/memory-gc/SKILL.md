@@ -54,10 +54,14 @@ unrecoverable, so a person approves every mutation).
 - **Sandbox note**: Bash writes to the memory dir (mkdir/mv/chmod) fail with "Read-only file
   system" under the default Bash sandbox — the memory dir is outside its write allowlist.
   The standard remedy is per-run: rerun the failing command with the sandbox disabled, going
-  through the user's normal approval each time. If the user asks how to stop these prompts
-  permanently, show them the snippet below for the current project's memory dir and let them
-  add it to their user-level Claude Code `settings.json` **themselves, outside the session**
-  — never edit `settings.json` for them, and do not propose the edit unprompted:
+  through the user's normal approval each time. (That rerun exists only while the sandbox's
+  `allowUnsandboxedCommands` escape hatch is enabled — the default; under a strict sandbox
+  it is refused and the user's allowlist entry below is the only path.) If the user asks how
+  to stop these prompts permanently, show them the snippet below with
+  `<encoded-project>/memory` replaced by this session's actual memory dir — the path from
+  the "Memory" section, same rule as above, never derived from cwd — and let them add it to
+  their user-level Claude Code `settings.json` **themselves, outside the session** — never
+  edit `settings.json` for them, and do not propose the edit unprompted:
 
   ```json
   { "sandbox": { "filesystem": { "allowWrite": ["~/.claude/projects/<encoded-project>/memory"] } } }
