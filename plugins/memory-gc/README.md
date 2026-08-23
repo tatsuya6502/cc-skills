@@ -55,6 +55,18 @@ exits 0 and never blocks a session.
 your team or its processes work. `lint.sh` itself only knows the universal
 `project_memory_gc_log.md` default.
 
+`<memory-dir>/gc-config.txt` (optional) moves the weekly gc off its default Monday:
+
+```text
+# memory-gc per-project config
+weekday=Friday
+```
+
+With the file or the `weekday=` key absent, the cadence stays on Monday. A gc run writes
+`next due` as the next occurrence of the configured day and names that day in the gc-log
+index line. Both files are deliberately non-`.md` so they stay out of memory scans and
+recall.
+
 ## Requirements
 
 Bash plus standard Unix tools (awk / grep / sed / stat / date). Works with both the GNU

@@ -44,7 +44,8 @@ unrecoverable, so a person approves every mutation).
   `team_remote_flextime`, `deploy_approval_policy`, `memory_gc_log`. The exemption
   list is per-project data, so it lives in `<memory-dir>/durable-allowlist.txt` (one filename
   per line, `#` comments; deliberately not a `.md` so it stays out of the memory scans and
-  recall) — lint.sh itself carries only the universal `project_memory_gc_log.md` default and
+  recall — the same pattern `gc-config.txt` follows, see Step 6) — lint.sh itself carries
+  only the universal `project_memory_gc_log.md` default and
   must never hardcode project-specific names (it is one global script serving every project
   on the machine). Extend the allowlist only with the user's OK. Work-log-derived
   project memories go through Step 3 (lesson extraction) and are then ARCHIVED. Extraction is
@@ -157,7 +158,21 @@ The index line must carry both dates — the SessionStart hook and other session
 - [memory-gc log](project_memory_gc_log.md) — Weekly gc (Mondays, manual). last run: YYYY-MM-DD; next due: YYYY-MM-DD. If today > next due, remind the user to run /memory-gc.
 ```
 
-next due = the Monday after the run date. In the body, append one line per run:
+next due = the next occurrence of the gc weekday after the run date. The gc weekday defaults
+to Monday; an optional `<memory-dir>/gc-config.txt` overrides it:
+
+```text
+# memory-gc per-project config
+weekday=Friday
+```
+
+With the file or the `weekday=` key absent, behavior is unchanged (Monday). The weekday word
+in the index line ("Mondays") follows the configured day so the line stays self-describing.
+Like `durable-allowlist.txt` (ground rules), this is per-project data in a deliberately
+non-`.md` file, keeping it out of the memory scans and recall; lint.sh needs no change — it
+compares dates only.
+
+In the body, append one line per run:
 `YYYY-MM-DD: archived N, extracted M lessons, nominated P for promotion, index X lines / Y KB (was X'/Y'). Notes: ...`
 
 List the approved PROMOTE nominations by name in the gc log body — they are the input queue for
