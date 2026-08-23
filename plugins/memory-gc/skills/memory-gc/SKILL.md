@@ -61,8 +61,12 @@ unrecoverable, so a person approves every mutation).
   ```
 
   (Permission rules and the sandbox are separate layers — a `Read(...)`/`Edit(...)` permission
-  rule does not grant sandboxed Bash writes.) Until that is in place, rerun the failing
-  command with the sandbox disabled. The Write/Edit tools are not affected either way.
+  rule does not grant sandboxed Bash writes.) Trade-off to state when asking: the wildcard
+  covers every project's memory dir — the same surface the un-sandboxed Write/Edit tools
+  already reach — and since memory files have no git history, a user preferring least
+  privilege can list concrete per-project paths instead. Until the setup is in place, rerun
+  the failing command with the sandbox disabled. The Write/Edit tools are not affected
+  either way.
 - **Token economy**: when more than ~10 bodies need reading, delegate the reads to one subagent
   (Sonnet/Opus) that returns per-file: status, pending items (verbatim), durable knowledge,
   archive-safety verdict. Keep the final adjudication in the main session.
@@ -161,7 +165,8 @@ available), output the table as the deliverable and apply nothing.
 
 ### Step 6 — Record the run
 
-Update `project_memory_gc_log.md` (create from the template below if missing) AND its index line.
+Update `project_memory_gc_log.md` (create from the template below if missing — the template
+shows the Monday default; the weekday word follows the config, see below) AND its index line.
 The index line must carry both dates — the SessionStart hook and other sessions read it there:
 
 ```text

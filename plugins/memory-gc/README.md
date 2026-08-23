@@ -25,7 +25,7 @@ A weekly "gardening" pass over the project memory:
    always requires explicit per-file permission.
 
 Trigger it with `/memory-gc`, or by explicitly asking for project-memory maintenance —
-"run memory gc", "triage the project memory", "is the memory index consistent?". Requests
+"run memory gc", "triage the project memory", "is the project-memory index consistent?". Requests
 that merely sound adjacent (cleaning up a repo, disk, or chat history) are not triggers.
 And even an unintended activation is harmless by design: the pass stops at the proposal
 table and mutates nothing without your per-row approval.
@@ -82,6 +82,11 @@ once in `~/.claude/settings.json` — archiving moves files there with `mkdir`/`
 
 Without it, those commands fail with "Read-only file system" and have to be rerun with the
 sandbox disabled.
+
+The wildcard covers the memory directories of **all** your projects — the same files
+Claude's Write/Edit tools can already edit without the sandbox, but memory files have no git
+history, so weigh the convenience. If you prefer least privilege, list the concrete
+`~/.claude/projects/<encoded-project>/memory` paths you actually use instead.
 
 ## Requirements
 

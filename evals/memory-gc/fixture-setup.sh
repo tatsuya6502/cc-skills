@@ -12,6 +12,9 @@ mkdir -p "$DEST"
 cp -r "$SRC"/. "$DEST"/
 if [ -n "$WEEKDAY" ]; then
   printf '# memory-gc per-project config\nweekday=%s\n' "$WEEKDAY" > "$DEST/gc-config.txt"
+else
+  # A reused dest must come out identical to a fresh default stage — drop any stale config.
+  rm -f "$DEST/gc-config.txt"
 fi
 # 90-day-review candidates: one team-sharable gotcha (expect PROMOTE nomination),
 # one personal-preference feedback (expect "still true → reviewed:" refresh).
