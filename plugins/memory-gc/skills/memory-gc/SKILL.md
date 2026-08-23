@@ -51,9 +51,18 @@ unrecoverable, so a person approves every mutation).
   project memories go through Step 3 (lesson extraction) and are then ARCHIVED. Extraction is
   the *precondition* of the archive, not an alternative to it — once the lessons are out, the
   source body moves to `archive/`. Demoting a work log into Durable is not an escape hatch.
-- **Sandbox note**: Bash writes to the memory dir (mkdir/mv/chmod) are outside the sandbox write
-  allowlist — expect "Read-only file system" and rerun those commands with sandbox disabled.
-  The Write/Edit tools are not affected.
+- **Sandbox note**: Bash writes to the memory dir (mkdir/mv/chmod) fail with "Read-only file
+  system" under the default Bash sandbox — the memory dir is outside its write allowlist. The
+  durable fix is a one-time setup: ask the user to add the memory directories to the sandbox
+  write allowlist in `~/.claude/settings.json`:
+
+  ```json
+  { "sandbox": { "filesystem": { "allowWrite": ["~/.claude/projects/*/memory"] } } }
+  ```
+
+  (Permission rules and the sandbox are separate layers — a `Read(...)`/`Edit(...)` permission
+  rule does not grant sandboxed Bash writes.) Until that is in place, rerun the failing
+  command with the sandbox disabled. The Write/Edit tools are not affected either way.
 - **Token economy**: when more than ~10 bodies need reading, delegate the reads to one subagent
   (Sonnet/Opus) that returns per-file: status, pending items (verbatim), durable knowledge,
   archive-safety verdict. Keep the final adjudication in the main session.
@@ -142,7 +151,8 @@ available), output the table as the deliverable and apply nothing.
 
 ### Step 5 — Apply approved rows only
 
-1. `mkdir -p <memory-dir>/archive` and `mv` approved files (sandbox off).
+1. `mkdir -p <memory-dir>/archive` and `mv` approved files (needs the sandbox `allowWrite`
+   setup from the ground rules, or the sandbox disabled).
 2. Append one line per file to `archive/INDEX.md`: `- [Title](file.md) — final state (archived YYYY-MM-DD)`.
 3. Update MEMORY.md: remove archived lines, add extraction lines to Durable, apply approved
    MERGE/UPDATE/section moves. Keep untouched lines verbatim — churn hides real changes.

@@ -67,6 +67,18 @@ With the file or the `weekday=` key absent, the cadence stays on Monday. A gc ru
 index line. Both files are deliberately non-`.md` so they stay out of memory scans and
 recall.
 
+## Sandbox setup
+
+If you run Claude Code with the Bash sandbox enabled, allow writes to the memory directories
+once in `~/.claude/settings.json` — archiving moves files there with `mkdir`/`mv`:
+
+```json
+{ "sandbox": { "filesystem": { "allowWrite": ["~/.claude/projects/*/memory"] } } }
+```
+
+Without it, those commands fail with "Read-only file system" and have to be rerun with the
+sandbox disabled.
+
 ## Requirements
 
 Bash plus standard Unix tools (awk / grep / sed / stat / date). Works with both the GNU
