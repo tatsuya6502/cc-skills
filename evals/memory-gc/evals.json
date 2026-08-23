@@ -1,6 +1,6 @@
 {
   "skill_name": "memory-gc",
-  "fixture_note": "Canonical fixture lives in evals/memory-gc/fixture-memory/. ALWAYS stage it with evals/memory-gc/fixture-setup.sh <tmp-dir> first — the 90-day-review checks depend on mtimes that setup re-ages. Point the run at the staged copy, never at the canonical fixture.",
+  "fixture_note": "Canonical fixture lives in evals/memory-gc/fixture-memory/. ALWAYS stage it with evals/memory-gc/fixture-setup.sh <tmp-dir> first — the 90-day-review checks depend on mtimes that setup re-ages. Point the run at the staged copy, never at the canonical fixture. An optional second argument (a weekday name) additionally writes gc-config.txt into the staged copy for the configured-weekday eval; the canonical fixture itself stays config-free so the default-Monday path remains covered.",
   "evals": [
     {
       "id": 0,
@@ -43,6 +43,19 @@
         "Does NOT flag project_team_norms_fact.md (exempted via the per-project durable-allowlist.txt)",
         "Finds the two 90-day review-due files (reference_ancient_gotcha.md, feedback_old_but_true.md)",
         "Staged fixture directory content is unchanged after the run"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "gc-weekday-config",
+      "prompt": "Assume today is Wednesday 2026-08-26 and the user asked for the weekly memory gc pass. (Stage the fixture with fixture-setup.sh <tmp-dir> Friday so the staged memory dir contains gc-config.txt with weekday=Friday. Non-interactive; stop after producing the proposal table; modify no files. In addition to the table, state the exact gc-log index line that Step 6 would write after this run.)",
+      "expected_output": "Same triage quality as gc-triage, plus a stated Step 6 gc-log index line that follows the configured weekday: '(Fridays, manual)' with next due 2026-08-28 (the Friday after the run date), not the following Monday.",
+      "files": ["fixture-memory/ via fixture-setup.sh <tmp-dir> Friday"],
+      "assertions": [
+        "Reads gc-config.txt and identifies the configured gc weekday as Friday",
+        "The stated Step 6 index line names the configured day — '(Fridays, manual)', not '(Mondays, manual)'",
+        "The stated next-due date is 2026-08-28, the next Friday after the 2026-08-26 run date — not 2026-08-31 (the following Monday)",
+        "Staged fixture directory content is unchanged after the run (no files moved/edited)"
       ]
     }
   ]

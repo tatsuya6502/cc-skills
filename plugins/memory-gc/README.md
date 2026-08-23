@@ -24,7 +24,11 @@ A weekly "gardening" pass over the project memory:
 4. **Move, never delete** — archiving is `mv` into `archive/` plus an index line; deletion
    always requires explicit per-file permission.
 
-Trigger it with `/memory-gc`, or by asking for a memory cleanup / consistency check.
+Trigger it with `/memory-gc`, or by explicitly asking for project-memory maintenance —
+"run memory gc", "triage the project memory", "is the project-memory index consistent?". Requests
+that merely sound adjacent (cleaning up a repo, disk, or chat history) are not triggers.
+And even an unintended activation is harmless by design: the pass stops at the proposal
+table and mutates nothing without your per-row approval.
 
 ### `promote-knowledge` skill
 
@@ -54,6 +58,35 @@ exits 0 and never blocks a session.
 `project_*` memories allowed to stay in the Durable section — still-referenced facts about how
 your team or its processes work. `lint.sh` itself only knows the universal
 `project_memory_gc_log.md` default.
+
+`<memory-dir>/gc-config.txt` (optional) moves the weekly gc off its default Monday:
+
+```text
+# memory-gc per-project config
+weekday=Friday
+```
+
+With the file or the `weekday=` key absent, the cadence stays on Monday. A gc run writes
+`next due` as the next occurrence of the configured day and names that day in the gc-log
+index line. Both files are deliberately non-`.md` so they stay out of memory scans and
+recall.
+
+## Sandbox setup
+
+If you run Claude Code with the Bash sandbox enabled, allow writes to the memory directories
+once in `~/.claude/settings.json` — archiving moves files there with `mkdir`/`mv`:
+
+```json
+{ "sandbox": { "filesystem": { "allowWrite": ["~/.claude/projects/*/memory"] } } }
+```
+
+Without it, those commands fail with "Read-only file system" and have to be rerun with the
+sandbox disabled.
+
+The wildcard covers the memory directories of **all** your projects — the same files
+Claude's Write/Edit tools can already edit without the sandbox, but memory files have no git
+history, so weigh the convenience. If you prefer least privilege, list the concrete
+`~/.claude/projects/<encoded-project>/memory` paths you actually use instead.
 
 ## Requirements
 

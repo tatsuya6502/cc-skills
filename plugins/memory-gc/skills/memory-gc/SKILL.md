@@ -44,15 +44,29 @@ unrecoverable, so a person approves every mutation).
   `team_remote_flextime`, `deploy_approval_policy`, `memory_gc_log`. The exemption
   list is per-project data, so it lives in `<memory-dir>/durable-allowlist.txt` (one filename
   per line, `#` comments; deliberately not a `.md` so it stays out of the memory scans and
-  recall) — lint.sh itself carries only the universal `project_memory_gc_log.md` default and
+  recall — the same pattern `gc-config.txt` follows, see Step 6) — lint.sh itself carries
+  only the universal `project_memory_gc_log.md` default and
   must never hardcode project-specific names (it is one global script serving every project
   on the machine). Extend the allowlist only with the user's OK. Work-log-derived
   project memories go through Step 3 (lesson extraction) and are then ARCHIVED. Extraction is
   the *precondition* of the archive, not an alternative to it — once the lessons are out, the
   source body moves to `archive/`. Demoting a work log into Durable is not an escape hatch.
-- **Sandbox note**: Bash writes to the memory dir (mkdir/mv/chmod) are outside the sandbox write
-  allowlist — expect "Read-only file system" and rerun those commands with sandbox disabled.
-  The Write/Edit tools are not affected.
+- **Sandbox note**: Bash writes to the memory dir (mkdir/mv/chmod) fail with "Read-only file
+  system" under the default Bash sandbox — the memory dir is outside its write allowlist. The
+  durable fix is a one-time setup: ask the user to add the memory directories to the sandbox
+  write allowlist in `~/.claude/settings.json`:
+
+  ```json
+  { "sandbox": { "filesystem": { "allowWrite": ["~/.claude/projects/*/memory"] } } }
+  ```
+
+  (Permission rules and the sandbox are separate layers — a `Read(...)`/`Edit(...)` permission
+  rule does not grant sandboxed Bash writes.) Trade-off to state when asking: the wildcard
+  covers every project's memory dir — the same surface the un-sandboxed Write/Edit tools
+  already reach — and since memory files have no git history, a user preferring least
+  privilege can list concrete per-project paths instead. Until the setup is in place, rerun
+  the failing command with the sandbox disabled. The Write/Edit tools are not affected
+  either way.
 - **Token economy**: when more than ~10 bodies need reading, delegate the reads to one subagent
   (Sonnet/Opus) that returns per-file: status, pending items (verbatim), durable knowledge,
   archive-safety verdict. Keep the final adjudication in the main session.
@@ -141,7 +155,8 @@ available), output the table as the deliverable and apply nothing.
 
 ### Step 5 — Apply approved rows only
 
-1. `mkdir -p <memory-dir>/archive` and `mv` approved files (sandbox off).
+1. `mkdir -p <memory-dir>/archive` and `mv` approved files (needs the sandbox `allowWrite`
+   setup from the ground rules, or the sandbox disabled).
 2. Append one line per file to `archive/INDEX.md`: `- [Title](file.md) — final state (archived YYYY-MM-DD)`.
 3. Update MEMORY.md: remove archived lines, add extraction lines to Durable, apply approved
    MERGE/UPDATE/section moves. Keep untouched lines verbatim — churn hides real changes.
@@ -150,14 +165,29 @@ available), output the table as the deliverable and apply nothing.
 
 ### Step 6 — Record the run
 
-Update `project_memory_gc_log.md` (create from the template below if missing) AND its index line.
+Update `project_memory_gc_log.md` (create from the template below if missing — the template
+shows the Monday default; the weekday word follows the config, see below) AND its index line.
 The index line must carry both dates — the SessionStart hook and other sessions read it there:
 
 ```text
 - [memory-gc log](project_memory_gc_log.md) — Weekly gc (Mondays, manual). last run: YYYY-MM-DD; next due: YYYY-MM-DD. If today > next due, remind the user to run /memory-gc.
 ```
 
-next due = the Monday after the run date. In the body, append one line per run:
+next due = the next occurrence of the gc weekday after the run date. The gc weekday defaults
+to Monday; an optional `<memory-dir>/gc-config.txt` overrides it:
+
+```text
+# memory-gc per-project config
+weekday=Friday
+```
+
+With the file or the `weekday=` key absent, behavior is unchanged (Monday). The weekday word
+in the index line ("Mondays") follows the configured day so the line stays self-describing.
+Like `durable-allowlist.txt` (ground rules), this is per-project data in a deliberately
+non-`.md` file, keeping it out of the memory scans and recall; lint.sh needs no change — it
+compares dates only.
+
+In the body, append one line per run:
 `YYYY-MM-DD: archived N, extracted M lessons, nominated P for promotion, index X lines / Y KB (was X'/Y'). Notes: ...`
 
 List the approved PROMOTE nominations by name in the gc log body — they are the input queue for
