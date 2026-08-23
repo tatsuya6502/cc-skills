@@ -3,10 +3,11 @@ name: promote-knowledge
 description: >
   Human-adjudicated pass that graduates team-sharable technical knowledge OUT of Claude Code's
   private project memory INTO the repository's shared docs (CLAUDE.md / .claude/rules / README /
-  docs). Use whenever the user asks to promote knowledge, graduate memories, share lessons with
-  the team, asks "which of my memories
-  should live in the repo?", or after a memory-gc run has produced PROMOTE nominations (the gc
-  log lists them — offer to run this skill). Produces UNCOMMITTED diffs only and presents a
+  docs). Use whenever the user asks to promote knowledge from project memory, graduate
+  memories into repo docs, share lessons recorded in project memory with the team, asks
+  "which of my memories should live in the repo?", or after a memory-gc run has produced
+  PROMOTE nominations (the gc log lists them — offer to run this skill). Do not activate for
+  generic documentation or knowledge-sharing requests that never mention project memory. Produces UNCOMMITTED diffs only and presents a
   proposal table FIRST; the user approves per row, and the user does every commit/PR themselves.
 ---
 

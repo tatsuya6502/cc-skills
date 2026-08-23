@@ -24,7 +24,11 @@ A weekly "gardening" pass over the project memory:
 4. **Move, never delete** — archiving is `mv` into `archive/` plus an index line; deletion
    always requires explicit per-file permission.
 
-Trigger it with `/memory-gc`, or by asking for a memory cleanup / consistency check.
+Trigger it with `/memory-gc`, or by explicitly asking for project-memory maintenance —
+"run memory gc", "triage the project memory", "is the memory index consistent?". Requests
+that merely sound adjacent (cleaning up a repo, disk, or chat history) are not triggers.
+And even an unintended activation is harmless by design: the pass stops at the proposal
+table and mutates nothing without your per-row approval.
 
 ### `promote-knowledge` skill
 
