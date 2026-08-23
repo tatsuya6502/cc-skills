@@ -71,22 +71,27 @@ With the file or the `weekday=` key absent, the cadence stays on Monday. A gc ru
 index line. Both files are deliberately non-`.md` so they stay out of memory scans and
 recall.
 
-## Sandbox setup
+## Sandbox setup (optional)
 
-If you run Claude Code with the Bash sandbox enabled, allow writes to the memory directories
-once in `~/.claude/settings.json` — archiving moves files there with `mkdir`/`mv`:
+If you run Claude Code with the Bash sandbox enabled, archive moves (`mkdir`/`mv` into the
+memory directory) fail with "Read-only file system" and get rerun with the sandbox disabled
+— a per-run escalation that you approve each time. That default works fine as-is.
+
+If you want to stop those prompts, you can allowlist a project's memory directory for
+sandboxed writes in your user-level `settings.json` (see the
+[Claude Code settings docs](https://code.claude.com/docs/en/settings) for its location).
+This is an edit **you make yourself** — the skill instructs Claude never to edit
+`settings.json`:
 
 ```json
-{ "sandbox": { "filesystem": { "allowWrite": ["~/.claude/projects/*/memory"] } } }
+{ "sandbox": { "filesystem": { "allowWrite": ["~/.claude/projects/<encoded-project>/memory"] } } }
 ```
 
-Without it, those commands fail with "Read-only file system" and have to be rerun with the
-sandbox disabled.
-
-The wildcard covers the memory directories of **all** your projects — the same files
-Claude's Write/Edit tools can already edit without the sandbox, but memory files have no git
-history, so weigh the convenience. If you prefer least privilege, list the concrete
-`~/.claude/projects/<encoded-project>/memory` paths you actually use instead.
+Listing the concrete paths you actually garbage-collect is the least-privilege choice. A
+wildcard (`~/.claude/projects/*/memory`) also works but widens sandboxed write access to
+the memory directories of **all** your projects — the same files Claude's Write/Edit tools
+can already edit without the sandbox, but memory files have no git history, so weigh the
+convenience before choosing it.
 
 ## Requirements
 
