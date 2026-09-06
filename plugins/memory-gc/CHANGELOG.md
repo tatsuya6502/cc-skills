@@ -4,6 +4,20 @@ All notable changes to the memory-gc plugin are documented in this file. The for
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [1.0.2] - 2026-09-06
+
+### Fixed
+
+- Removed the sandbox `allowWrite` guidance from SKILL.md and the README: it never worked.
+  `~/.claude/projects/` is a built-in *protected path* of the Bash sandbox, and per the
+  official sandboxing docs no `allowWrite` entry lifts that protection — only
+  `filesystem.disabled` does, which drops filesystem isolation for every path and is not
+  recommended. The skill now simply reruns a refused `mkdir`/`mv` with the sandbox disabled
+  and says so in its report; under strict sandbox mode it reports the failed moves and stops
+  ([#9](https://github.com/tatsuya6502/cc-skills/issues/9)). Doing the archive moves with the
+  Write/Edit tools instead was considered and rejected: removing the original still needs a
+  Bash `rm` on the same protected path, so it would not avoid the unsandboxed step.
+
 ## [1.0.1] - 2026-08-23
 
 ### Changed

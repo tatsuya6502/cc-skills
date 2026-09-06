@@ -71,35 +71,22 @@ With the file or the `weekday=` key absent, the cadence stays on Monday. A gc ru
 index line. Both files are deliberately non-`.md` so they stay out of memory scans and
 recall.
 
-## Sandbox setup (optional)
+## Sandbox behavior
 
 If you run Claude Code with the Bash sandbox enabled, archive moves (`mkdir`/`mv` into the
-memory directory) fail with "Read-only file system" and get rerun with the sandbox disabled
-— a per-run escalation that you approve each time. That default works fine as-is. (The
-rerun relies on the sandbox's `allowUnsandboxedCommands` escape hatch, enabled by default;
-in strict sandbox mode the command simply fails, and the allowlist entry below becomes the
-only option.)
+memory directory) fail with "Read-only file system", and Claude reruns them with the sandbox
+disabled — a per-run escalation that goes through your normal permission flow (a prompt in
+Manual mode, the classifier in auto mode) and that the gc report calls out. This is expected and there is no per-path setting that avoids it: `~/.claude/projects/`
+is one of the sandbox's built-in **protected paths**, and the
+[sandboxing docs](https://code.claude.com/docs/en/sandboxing#protected-paths) state that an
+`allowWrite` entry covering such a path does not lift the protection. The only setting that
+would is `filesystem.disabled`, which turns off filesystem isolation for every path — not
+worth it for a weekly `mv`, so the skill never suggests it and never edits `settings.json`.
 
-If you want to stop those prompts, you can allowlist a project's memory directory for
-sandboxed writes in your user-level `settings.json` (see the
-[Claude Code settings docs](https://code.claude.com/docs/en/settings) for its location).
-This is an edit **you make yourself** — the skill instructs Claude never to edit
-`settings.json`:
-
-```json
-{ "sandbox": { "filesystem": { "allowWrite": ["~/.claude/projects/<encoded-project>/memory"] } } }
-```
-
-Replace `<encoded-project>` with your project's actual memory directory — Claude prints the
-exact path in the session's "Memory" section, so just ask it. Don't hand-derive the path
-from your project's location: git worktrees, for example, share the main repository's memory
-directory, so a guessed encoding can point at the wrong place.
-
-Listing the concrete paths you actually garbage-collect is the least-privilege choice. A
-wildcard (`~/.claude/projects/*/memory`) also works but widens sandboxed write access to
-the memory directories of **all** your projects — the same files Claude's Write/Edit tools
-can already edit without the sandbox, but memory files have no git history, so weigh the
-convenience before choosing it.
+In strict sandbox mode (`allowUnsandboxedCommands: false`) the rerun is refused; the skill
+then reports which moves failed, leaves those index lines untouched, and stops. Claude's
+Write/Edit tools go through the permission system rather than the sandbox, so creating new
+memory files (lesson extraction, bundles) is unaffected either way.
 
 ## Requirements
 
