@@ -54,8 +54,8 @@ unrecoverable, so a person approves every mutation).
 - **Sandbox note**: Bash writes to the memory dir (`mkdir`/`mv`) fail with "Read-only file
   system" under the Bash sandbox, because `~/.claude/projects/` is one of the sandbox's
   built-in *protected paths*. The remedy is per-run: rerun the failing command with the
-  sandbox disabled, through the user's normal approval, and say in the report that the move
-  ran unsandboxed. Do not ask the user to run the command themselves — hand-typed moves invite
+  sandbox disabled — it goes through the regular permission flow (a prompt in Manual mode,
+  the classifier in auto mode) — and say in the report that the move ran unsandboxed. Do not ask the user to run the command themselves — hand-typed moves invite
   mistakes in a directory with no git history. Under strict sandbox mode
   (`allowUnsandboxedCommands: false`) the rerun is refused; then report which moves failed,
   leave their index lines untouched, and stop — do not improvise workarounds.

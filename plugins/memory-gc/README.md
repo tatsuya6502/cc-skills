@@ -75,8 +75,8 @@ recall.
 
 If you run Claude Code with the Bash sandbox enabled, archive moves (`mkdir`/`mv` into the
 memory directory) fail with "Read-only file system", and Claude reruns them with the sandbox
-disabled — a per-run escalation that you approve each time, and that the gc report calls
-out. This is expected and there is no per-path setting that avoids it: `~/.claude/projects/`
+disabled — a per-run escalation that goes through your normal permission flow (a prompt in
+Manual mode, the classifier in auto mode) and that the gc report calls out. This is expected and there is no per-path setting that avoids it: `~/.claude/projects/`
 is one of the sandbox's built-in **protected paths**, and the
 [sandboxing docs](https://code.claude.com/docs/en/sandboxing#protected-paths) state that an
 `allowWrite` entry covering such a path does not lift the protection. The only setting that
