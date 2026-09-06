@@ -42,9 +42,9 @@ evals/<skill>/                    # eval suites + fixtures for the skills (dev o
 CodeRabbit reviews every PR with its default configuration (no `.coderabbit.yaml`; the
 conditions under which automatic review runs are at
 https://docs.coderabbit.ai/configuration/auto-review). Included reviews per hour follow the
-OSS tier and depend on the repo's star count — currently one — so batch fixes into fewer
-pushes; comment `@coderabbitai rate limit` on a PR to check the remaining allowance without
-consuming a review. Details: https://docs.coderabbit.ai/management/plans#rate-limits.
+OSS tier and depend on the repo's star count, so batch fixes into fewer pushes; comment
+`@coderabbitai rate limit` on a PR to check the remaining allowance without consuming a
+review. Details: https://docs.coderabbit.ai/management/plans#rate-limits.
 After a fix is pushed it re-reviews on its own and resolves the thread itself once satisfied;
 that re-review may arrive as a PR comment rather than a review. If a review never posts,
 re-trigger it. Replying "Please remember: ..." on a thread stores a durable learning; two are on
