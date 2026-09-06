@@ -36,3 +36,13 @@ evals/<skill>/                    # eval suites + fixtures for the skills (dev o
   tool names) before they enter history; scrubbing after a push is too late.
 - Bump the plugin's `version` in both `plugin.json` and `marketplace.json` when releasing
   user-visible changes — installed copies only update when the version changes.
+
+## Pull requests
+
+CodeRabbit reviews every PR. The free plan includes one review per hour, so batch fixes into
+fewer pushes — a push inside the window gets "Review limit reached, next review in N minutes".
+After a fix is pushed it re-reviews on its own and resolves the thread itself once satisfied;
+that re-review may arrive as a PR comment rather than a review. If a review never posts,
+re-trigger it. Replying "Please remember: ..." on a thread stores a durable learning; two are on
+file: author attribution in manifests/LICENSE/README is intentional, and
+`evals/*/fixture-memory/` is synthetic data that may look personal by design.
