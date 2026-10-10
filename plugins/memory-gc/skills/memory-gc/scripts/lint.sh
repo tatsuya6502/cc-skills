@@ -6,10 +6,10 @@
 # Multi-file findings are aggregated into one line per check to keep hook output compact.
 
 set -u
-# ${#line} must count characters (not bytes) — Durable lines may contain Japanese.
-# C.UTF-8 is glibc-only (older macOS lacks it; macOS offers en_US.UTF-8).
-# Auto-pick the first UTF-8 locale available so character counts stay correct on
-# both platforms; degrade to C (byte counts) if none exists.
+# Prefer a UTF-8 locale so text tools treat Durable lines (which may contain Japanese) as
+# characters. C.UTF-8 is glibc-only (older macOS lacks it; macOS offers en_US.UTF-8), so
+# auto-pick the first one available and fall back to C. The line-length check (7) does not
+# depend on this: it counts characters itself (see nchars there).
 utf8_loc() {
   for l in C.UTF-8 en_US.UTF-8; do
     if LC_ALL=$l locale charmap 2>/dev/null | grep -qi '^utf-8$'; then
@@ -137,7 +137,11 @@ while IFS= read -r line; do
       *" $slug "*) continue ;;
     esac
   fi
-  if [ "${#line}" -gt "$cap" ]; then
+  # Count characters, not bytes, regardless of locale: drop UTF-8 continuation bytes
+  # (0x80-0xBF) and count what is left. Octal ranges in tr are POSIX, so this works on
+  # GNU and BSD even when utf8_loc had to fall back to C.
+  nchars=$(printf '%s' "$line" | LC_ALL=C tr -d '\200-\277' | wc -c | tr -d ' ')
+  if [ "$nchars" -gt "$cap" ]; then
     if [ "$cap" -eq 300 ]; then
       longbundle="$longbundle ${slug:-<no-link>}"
     else
