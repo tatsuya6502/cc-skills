@@ -45,8 +45,12 @@ https://docs.coderabbit.ai/configuration/auto-review). Included reviews per hour
 OSS tier and depend on the repo's star count, so batch fixes into fewer pushes; comment
 `@coderabbitai rate limit` on a PR to check the remaining allowance without consuming a
 review. Details: https://docs.coderabbit.ai/management/plans#rate-limits.
-After a fix is pushed it re-reviews on its own and resolves the thread itself once satisfied;
-that re-review may arrive as a PR comment rather than a review. If a review never posts,
-re-trigger it. Replying "Please remember: ..." on a thread stores a durable learning; two are on
+After a fix is pushed it re-reviews on its own only while the allowance lasts; a push that hits
+the limit is answered with "Review limit reached" and is NOT picked up when the window reopens,
+so comment `@coderabbitai review` to start it. An incremental re-review edits the existing
+summary comment ("No actionable comments were generated in the recent review") instead of
+posting a new review object (the GitHub comments API `?since=` filter matches that edit via
+`updated_at`), and it resolves the thread itself once satisfied. If a review never posts at all,
+re-trigger it the same way. Replying "Please remember: ..." on a thread stores a durable learning; two are on
 file: author attribution in manifests/LICENSE/README is intentional, and
 `evals/*/fixture-memory/` is synthetic data that may look personal by design.

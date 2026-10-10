@@ -5,8 +5,7 @@ metadata:
   type: reference
 ---
 
-Theme bundle (merged 2026-06-09 from five single-fact memories; back-links: [[reference_proxy_redirect]],
-[[reference_vpn_mtu]], [[reference_split_dns]], [[reference_runner_ipv6]], [[reference_wireguard_keepalive]]).
+Theme bundle (merged 2026-06-09 from five single-fact memories).
 
 - Corporate proxy strips the Proxy-Authorization header on redirects, so pin the mirror URL
   instead of following redirects. First seen 2026-02-14; re-confirmed 2026-04-03 after the
