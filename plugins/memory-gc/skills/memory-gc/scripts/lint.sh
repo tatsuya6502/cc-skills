@@ -6,10 +6,10 @@
 # Multi-file findings are aggregated into one line per check to keep hook output compact.
 
 set -u
-# ${#line} must count characters (not bytes) — Durable lines may contain Japanese.
-# C.UTF-8 is glibc-only (older macOS lacks it; macOS offers en_US.UTF-8).
-# Auto-pick the first UTF-8 locale available so character counts stay correct on
-# both platforms; degrade to C (byte counts) if none exists.
+# Prefer a UTF-8 locale so text tools treat Durable lines (which may contain Japanese) as
+# characters. C.UTF-8 is glibc-only (older macOS lacks it; macOS offers en_US.UTF-8), so
+# auto-pick the first one available and fall back to C. The line-length check (7) does not
+# depend on this: it counts characters itself (see nchars there).
 utf8_loc() {
   for l in C.UTF-8 en_US.UTF-8; do
     if LC_ALL=$l locale charmap 2>/dev/null | grep -qi '^utf-8$'; then
@@ -105,27 +105,31 @@ awk '
     if (c["Durable"] > 45) print "MEMORY-LINT: Durable section has " c["Durable"] " entries (>45 budget) — bundle / promote / archive"
   }' MEMORY.md
 
-# 6. Whole-file size (auxiliary — the per-section budgets above are the primary signal)
+# 6. Whole-file size. Bytes are what hits the harness read limit in practice, so the byte check
+#    is a primary signal alongside the per-section budgets; the line count stays auxiliary.
 lines=$(wc -l < MEMORY.md); bytes=$(wc -c < MEMORY.md)
 [ "$lines" -gt 120 ] && echo "MEMORY-LINT: MEMORY.md is $lines lines (>120, auxiliary) — consider running /memory-gc"
-[ "$bytes" -gt 20000 ] && echo "MEMORY-LINT: MEMORY.md is $bytes bytes (>20000, auxiliary) — consider running /memory-gc"
+[ "$bytes" -gt 20000 ] && echo "MEMORY-LINT: MEMORY.md is $bytes bytes (>20000) — compact overlong index lines (see the line-length findings) or run /memory-gc"
 
 # Collect Durable-section entry lines / file links once for checks 7-9
 DURABLE_LINES=$(awk '/^## Durable/{d=1;next} /^## /{d=0} d && /^- \[/' MEMORY.md)
 DURABLE_FILES=$(printf '%s\n' "$DURABLE_LINES" | md_links | sort -u)
 
-# 7. Durable index lines over 160 chars — running-history leaking into the index.
-#    Two exemptions: lines whose link title contains "(bundle)" (bundle lines must keep every
-#    trigger word of the memories they replaced, so they run long by design), and lines whose
-#    link target is in the Durable project allowlist (those index lines are template-mandated
-#    or user-adjudicated — e.g. the gc-log line must carry both dates plus the reminder
-#    sentence, which alone exceeds 160 chars).
+# 7. Durable index lines over their cap — running-history leaking into the index.
+#    Plain lines: 160 chars. Bundle lines (link title contains "(bundle)"): 300 chars — a bundle
+#    line must keep every trigger word of the memories it replaced (recall reads only MEMORY.md),
+#    but as a keyword list, not as a compressed copy of the bodies; 3-5 bundled memories fit in
+#    ~220 chars. Exempt: lines whose link target is in the Durable project allowlist (those index
+#    lines are template-mandated or user-adjudicated — e.g. the gc-log line must carry both dates
+#    plus the reminder sentence, which alone exceeds 160 chars).
 long=""
+longbundle=""
 while IFS= read -r line; do
   [ -n "$line" ] || continue
-  title=${line%%"]("*}   # link title = text before the first "](" — "(bundle)" elsewhere in the line must not exempt it
+  cap=160
+  title=${line%%"]("*}   # link title = text before the first "](" — "(bundle)" elsewhere in the line gets the plain cap
   if [ "$title" != "$line" ]; then
-    case "$title" in *"(bundle)"*) continue ;; esac
+    case "$title" in *"(bundle)"*) cap=300 ;; esac
   fi
   slug=$(printf '%s' "$line" | md_links | head -1)
   if [ -n "$slug" ]; then   # guard: an empty slug must not match allowlist padding
@@ -133,13 +137,22 @@ while IFS= read -r line; do
       *" $slug "*) continue ;;
     esac
   fi
-  if [ "${#line}" -gt 160 ]; then
-    long="$long ${slug:-<no-link>}"
+  # Count characters, not bytes, regardless of locale: drop UTF-8 continuation bytes
+  # (0x80-0xBF) and count what is left. Octal ranges in tr are POSIX, so this works on
+  # GNU and BSD even when utf8_loc had to fall back to C.
+  nchars=$(printf '%s' "$line" | LC_ALL=C tr -d '\200-\277' | wc -c | tr -d ' ')
+  if [ "$nchars" -gt "$cap" ]; then
+    if [ "$cap" -eq 300 ]; then
+      longbundle="$longbundle ${slug:-<no-link>}"
+    else
+      long="$long ${slug:-<no-link>}"
+    fi
   fi
 done <<EOF
 $DURABLE_LINES
 EOF
 [ -n "$long" ] && echo "MEMORY-LINT: Durable line(s) >160 chars (move history into the body):$long"
+[ -n "$longbundle" ] && echo "MEMORY-LINT: Durable bundle line(s) >300 chars (rewrite as a keyword hook; confirm every dropped fact is in the body):$longbundle"
 
 # 8. Work-log project_* resident in Durable (outside the allowlist) — extract lessons, then archive
 misplaced=""
