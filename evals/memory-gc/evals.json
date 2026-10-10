@@ -1,12 +1,12 @@
 {
   "skill_name": "memory-gc",
-  "fixture_note": "Canonical fixture lives in evals/memory-gc/fixture-memory/. ALWAYS stage it with evals/memory-gc/fixture-setup.sh <tmp-dir> first — the 90-day-review checks depend on mtimes that setup re-ages. Point the run at the staged copy, never at the canonical fixture. An optional second argument (a weekday name) additionally writes gc-config.txt into the staged copy for the configured-weekday eval; the canonical fixture itself stays config-free so the default-Monday path remains covered.",
+  "fixture_note": "Canonical fixture lives in evals/memory-gc/fixture-memory/. ALWAYS stage it with evals/memory-gc/fixture-setup.sh <tmp-dir> first — the 90-day-review checks depend on mtimes that setup re-ages. Point the run at the staged copy, never at the canonical fixture. An optional second argument (a weekday name) additionally writes gc-config.txt into the staged copy for the configured-weekday eval; the canonical fixture itself stays config-free so the default-Monday path remains covered. For the weekday eval the operator stages with the weekday argument and tells the executor only the staged path — never the weekday — so the 'reads gc-config.txt' assertions measure reading the file.",
   "evals": [
     {
       "id": 0,
       "eval_name": "gc-triage",
       "prompt": "Assume today is Monday 2026-09-07, the weekly-maintenance day: run the memory gc (triage) pass over the project memory. (Use the staged fixture as the memory dir; non-interactive; stop after producing the proposal table; modify no files. In addition to the table, state the exact gc-log index line that Step 6 would write after this run.)",
-      "expected_output": "Triage proposal table covering all planted defects incl. v2 rules (Durable work-log archiving, 90-day 4-way review, PROMOTE nomination) and the lint-only defects turned into rows (misfiled entry below Archived, unlisted archive file, overlong Durable lines, the >300 bundle line rewritten as a keyword hook while the in-cap bundle line is left alone); correct KEEP for done-but-pending entry; lesson-extraction proposals; a MERGE of the chunk-size pair that keeps the newer 16 MiB rule current; a stated Step 6 gc-log index line with last run 2026-09-07 and next due 2026-09-14; no mutation of the staged fixture.",
+      "expected_output": "Triage proposal table covering all planted defects incl. v2 rules (Durable work-log archiving, 90-day 4-way review, PROMOTE nomination) and the lint-only defects turned into rows (misfiled entry below Archived, unlisted archive file, overlong Durable lines, the >300 bundle line rewritten as a keyword hook while the in-cap bundle line is left alone); correct KEEP for done-but-pending entry; lesson-extraction proposals; a MERGE of the chunk-size pair that keeps the newer 16 MiB rule current; a stated Step 6 gc-log index line with last run 2026-09-07 and next due 2026-09-14; the past-due GitOps revisit trigger raised to the user; a Step 1 metrics block with correct section counts and character-accurate line lengths; no mutation of the staged fixture.",
       "files": ["fixture-memory/ via fixture-setup.sh"],
       "assertions": [
         "Names project_orphan_fact.md as an orphan (exists but not indexed)",
@@ -20,12 +20,15 @@
         "Proposes UPDATE for reference_networking_bundle.md: rewrite its >300-char bundle index line as a keyword hook within 300 chars that keeps every trigger word (proxy redirects, VPN MTU, split-horizon DNS, IPv6 runners, wireguard keepalive) and leaves dates and running history to the body — not by moving trigger words into description:",
         "Does NOT propose shortening or rewriting the reference_build_ci_bundle.md index line (KEEP, or absent from the proposals) — a 217-char bundle line is within cap",
         "Flags reference_dup_a.md vs reference_dup_b.md as a contradicting pair with a MERGE proposal whose merged text keeps the newer 16 MiB / SDK >=2.5 rule as current (or explicitly asks the user which SDK version is deployed) and retains the older 8 MiB value as history in the body — a merge that silently keeps 8 MiB as the current value fails",
+        "The MERGE proposal includes the drafted merged body text itself (the actual sentences the merged file would contain, quoted or in a block), not only the merged index line plus a prose description of what the body would say — SKILL.md asks to 'propose the merged text' because the user adjudicates the text, not a summary of it",
         "Flags the past-due ⏰ license reminder to the user instead of silently archiving it",
         "Proposes lesson extraction + ARCHIVE (not KEEP/demote) for project_worklog_in_durable.md — work-log project_* may not stay in Durable",
         "Does NOT propose ARCHIVE/demote for project_team_norms_fact.md (team-process fact exempted via the per-project durable-allowlist.txt)",
         "Nominates reference_ancient_gotcha.md as PROMOTE (team-sharable technical gotcha, mtime >90d)",
         "For feedback_old_but_true.md (mtime >90d, personal preference) proposes the still-true refresh (append reviewed: YYYY-MM-DD), not PROMOTE/ARCHIVE",
-        "The stated Step 6 gc-log index line reads '(Mondays, manual)' with last run 2026-09-07 and next due 2026-09-14 — the Monday after the pinned run date",
+        "Raises project_idea_gitops.md to the user because its revisit trigger ('after the August release') has passed by 2026-09-07 — any row that asks for a decision (UPDATE with a new date, KEEP with the question, DELETE?/ARCHIVE pending the user's answer) passes; a bare KEEP or no row at all fails",
+        "Reports a Step 1 metrics block whose counts match the staged fixture: index entries Active 4 (the dead ghost link counts as an entry), Backlog 1, Durable 11, plus 1 entry below the Archived pointer; 2 files in archive/ besides INDEX.md",
+        "Every index-line length the run quotes matches the actual character count to within 1 (characters, not bytes — the lines contain em dashes, so a byte count is already off by 2): the reference_build_ci_bundle.md line is 217 chars and the reference_networking_bundle.md line 534; the plain Durable lines are 249 (reference_dup_a.md), 207 (reference_s3_retry.md) and 192 (the link-less CDN line)",
         "Staged fixture directory content is unchanged after the run (no files moved/edited)"
       ]
     },
@@ -33,7 +36,7 @@
       "id": 1,
       "eval_name": "lint-consistency",
       "prompt": "Check the project memory for inconsistencies. (Use the staged fixture as the memory dir; list every problem exhaustively; modify no files.)",
-      "expected_output": "All planted mechanical inconsistencies listed (incl. v2 checks: Durable long line, work-log project_* in Durable, 90-day review-due files; and the >300 bundle line, with the in-cap bundle line left alone); no mutation of the staged fixture.",
+      "expected_output": "All planted mechanical inconsistencies listed (incl. v2 checks: Durable long line, work-log project_* in Durable, 90-day review-due files; and the >300 bundle line, with the in-cap bundle line left alone) plus the judgment-only problems lint cannot see (the 8 vs 16 MiB contradiction, the done-but-Active old bug with its extractable lesson); no mutation of the staged fixture.",
       "files": ["fixture-memory/ via fixture-setup.sh"],
       "assertions": [
         "Finds the orphan file project_orphan_fact.md",
@@ -50,17 +53,21 @@
         "Finds the work-log project_* resident in Durable (project_worklog_in_durable.md, not project_memory_gc_log.md)",
         "Does NOT flag project_team_norms_fact.md for Durable placement (exempted via the per-project durable-allowlist.txt)",
         "Finds the two 90-day review-due files (reference_ancient_gotcha.md, feedback_old_but_true.md)",
+        "Finds the past-due ⏰ license reminder (project_license_reminder.md, due 2026-07-01) and presents it as something to raise with the user, not as an archive candidate",
+        "Beyond what lint.sh prints, reports the content contradiction between reference_dup_a.md (8 MiB, SDK 2.3) and reference_dup_b.md (16 MiB, SDK 2.5) as a problem — a run that only relays lint output misses this",
+        "Beyond what lint.sh prints, reports project_done_old_bug.md as done (2026-06-20) yet still filed under Active, and notes its ⚠️ regen-certs lesson must be extracted before the file is archived",
+        "Beyond what lint.sh prints, notices that reference_dup_a.md's index line carries a dated fact (2026-05-10 re-measured after SDK bump) that its body does not contain — so the overlong line cannot simply be condensed without first moving that fact into the body",
         "Staged fixture directory content is unchanged after the run"
       ]
     },
     {
       "id": 2,
       "eval_name": "gc-weekday-config",
-      "prompt": "Assume today is Wednesday 2026-08-26 and the user asked for the weekly memory gc pass. (Stage the fixture with fixture-setup.sh <tmp-dir> Friday so the staged memory dir contains gc-config.txt with weekday=Friday. Non-interactive; stop after producing the proposal table; modify no files. In addition to the table, state the exact gc-log index line that Step 6 would write after this run.)",
+      "prompt": "Assume today is Wednesday 2026-08-26 and the user asked for the weekly memory gc pass. (Use the staged fixture as the memory dir; non-interactive; stop after producing the proposal table; modify no files. In addition to the table, state the exact gc-log index line that Step 6 would write after this run.)",
       "expected_output": "Same triage quality as gc-triage, plus a stated Step 6 gc-log index line that follows the configured weekday: '(Fridays, manual)' with next due 2026-08-28 (the Friday after the run date), not the following Monday.",
-      "files": ["fixture-memory/ via fixture-setup.sh <tmp-dir> Friday"],
+      "files": ["fixture-memory/ via fixture-setup.sh <tmp-dir> Friday — stage it yourself before the run; the executor must learn the weekday only from the staged gc-config.txt, so keep 'Friday' out of the prompt, the staged directory name, and any notes passed along"],
       "assertions": [
-        "Reads gc-config.txt and identifies the configured gc weekday as Friday",
+        "Reads gc-config.txt and identifies the configured gc weekday as Friday (the prompt never names the day, so this can only come from the file)",
         "The stated Step 6 index line names the configured day — '(Fridays, manual)', not '(Mondays, manual)'",
         "The stated next-due date is 2026-08-28, the next Friday after the 2026-08-26 run date — not 2026-08-31 (the following Monday)",
         "Staged fixture directory content is unchanged after the run (no files moved/edited)"
