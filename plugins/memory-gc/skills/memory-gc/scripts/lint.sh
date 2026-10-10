@@ -67,6 +67,27 @@ if [ -f durable-allowlist.txt ]; then
   DURABLE_PROJECT_ALLOWLIST="$DURABLE_PROJECT_ALLOWLIST $extra"
 fi
 
+# Per-project size knobs from gc-config.txt (same key=value file that holds weekday=, which
+# only the skill reads). Both are proxies for the real limit — the whole-file byte cap in
+# check 6, which is deliberately NOT configurable. Defaults match the 1.1.0 behaviour:
+#   bundle_cap=300      cap for "(bundle)" Durable lines (check 7); 300 assumes 3-5 absorbed
+#                       memories — an index whose bundles absorb 6-22 facts each needs more
+#   durable_budget=45   Durable entry budget (check 5)
+# Only positive integers of at most 9 digits are accepted (larger values would overflow the
+# shell's `[ -gt ]`); anything else leaves the default in place.
+BUNDLE_CAP=300
+DURABLE_BUDGET=45
+cfg_int() {   # cfg_int <key> <default> — last matching "key=value" line wins; "# ..." comments
+  v=$(awk -F= -v k="$1" '{sub(/\r$/,""); sub(/#.*/,"")} NF < 2 {next}   # (inline too) are dropped
+        { key=$1; gsub(/[[:space:]]/,"",key); val=$2; gsub(/[[:space:]]/,"",val) }
+        NF==2 && key==k && val ~ /^[0-9]+$/ && length(val) <= 9 && val+0 > 0 {out=val} END {print out}' gc-config.txt 2>/dev/null)
+  printf '%s\n' "${v:-$2}"
+}
+if [ -f gc-config.txt ]; then
+  BUNDLE_CAP=$(cfg_int bundle_cap 300)
+  DURABLE_BUDGET=$(cfg_int durable_budget 45)
+fi
+
 # 1. Orphan files: live memories not referenced anywhere in the index
 for f in *.md; do
   [ "$f" = "MEMORY.md" ] && continue
@@ -93,7 +114,8 @@ if [ -d archive ]; then
 fi
 
 # 5. Per-section entry budgets (primary size signal): Active ≤22 / Backlog ≤10 / Durable ≤45
-awk '
+#    (Durable budget overridable via durable_budget= in gc-config.txt)
+awk -v db="$DURABLE_BUDGET" '
   /^## Active/   {s="Active";  next}
   /^## Backlog/  {s="Backlog"; next}
   /^## Durable/  {s="Durable"; next}
@@ -102,7 +124,7 @@ awk '
   END {
     if (c["Active"]  > 22) print "MEMORY-LINT: Active section has "  c["Active"]  " entries (>22 budget) — finish or archive work items"
     if (c["Backlog"] > 10) print "MEMORY-LINT: Backlog section has " c["Backlog"] " entries (>10 budget) — prune stale ideas"
-    if (c["Durable"] > 45) print "MEMORY-LINT: Durable section has " c["Durable"] " entries (>45 budget) — bundle / promote / archive"
+    if (c["Durable"] > db+0) print "MEMORY-LINT: Durable section has " c["Durable"] " entries (>" db " budget) — bundle / promote / archive"
   }' MEMORY.md
 
 # 6. Whole-file size. Bytes are what hits the harness read limit in practice, so the byte check
@@ -116,20 +138,20 @@ DURABLE_LINES=$(awk '/^## Durable/{d=1;next} /^## /{d=0} d && /^- \[/' MEMORY.md
 DURABLE_FILES=$(printf '%s\n' "$DURABLE_LINES" | md_links | sort -u)
 
 # 7. Durable index lines over their cap — running-history leaking into the index.
-#    Plain lines: 160 chars. Bundle lines (link title contains "(bundle)"): 300 chars — a bundle
-#    line must keep every trigger word of the memories it replaced (recall reads only MEMORY.md),
-#    but as a keyword list, not as a compressed copy of the bodies; 3-5 bundled memories fit in
-#    ~220 chars. Exempt: lines whose link target is in the Durable project allowlist (those index
+#    Plain lines: 160 chars. Bundle lines (link title contains "(bundle)"): BUNDLE_CAP chars
+#    (300 unless gc-config.txt says otherwise) — a bundle line must keep every trigger word of
+#    the memories it replaced (recall reads only MEMORY.md), but as a keyword list, not as a
+#    compressed copy of the bodies; 3-5 bundled memories fit in ~220 chars. Exempt: lines whose link target is in the Durable project allowlist (those index
 #    lines are template-mandated or user-adjudicated — e.g. the gc-log line must carry both dates
 #    plus the reminder sentence, which alone exceeds 160 chars).
 long=""
 longbundle=""
 while IFS= read -r line; do
   [ -n "$line" ] || continue
-  cap=160
+  cap=160; isbundle=0
   title=${line%%"]("*}   # link title = text before the first "](" — "(bundle)" elsewhere in the line gets the plain cap
   if [ "$title" != "$line" ]; then
-    case "$title" in *"(bundle)"*) cap=300 ;; esac
+    case "$title" in *"(bundle)"*) cap=$BUNDLE_CAP; isbundle=1 ;; esac
   fi
   slug=$(printf '%s' "$line" | md_links | head -1)
   if [ -n "$slug" ]; then   # guard: an empty slug must not match allowlist padding
@@ -142,7 +164,7 @@ while IFS= read -r line; do
   # GNU and BSD even when utf8_loc had to fall back to C.
   nchars=$(printf '%s' "$line" | LC_ALL=C tr -d '\200-\277' | wc -c | tr -d ' ')
   if [ "$nchars" -gt "$cap" ]; then
-    if [ "$cap" -eq 300 ]; then
+    if [ "$isbundle" -eq 1 ]; then
       longbundle="$longbundle ${slug:-<no-link>}"
     else
       long="$long ${slug:-<no-link>}"
@@ -152,7 +174,7 @@ done <<EOF
 $DURABLE_LINES
 EOF
 [ -n "$long" ] && echo "MEMORY-LINT: Durable line(s) >160 chars (move history into the body):$long"
-[ -n "$longbundle" ] && echo "MEMORY-LINT: Durable bundle line(s) >300 chars (rewrite as a keyword hook; confirm every dropped fact is in the body):$longbundle"
+[ -n "$longbundle" ] && echo "MEMORY-LINT: Durable bundle line(s) >$BUNDLE_CAP chars (rewrite as a keyword hook; confirm every dropped fact is in the body — or, if the line already is a keyword hook, raise bundle_cap in gc-config.txt):$longbundle"
 
 # 8. Work-log project_* resident in Durable (outside the allowlist) — extract lessons, then archive
 misplaced=""

@@ -1,17 +1,24 @@
 #!/usr/bin/env bash
 # Copy the canonical eval fixture to a working dir and apply the mtimes the checks depend on.
 # (mtimes cannot be stored in git/cp — the 90-day-review candidates must be re-aged here.)
-# Usage: fixture-setup.sh <dest-dir> [gc-weekday]
-# The optional second argument writes <dest-dir>/gc-config.txt with weekday=<gc-weekday>,
-# staging the configured-weekday eval path; omit it for the default-Monday fixture.
+# Usage: fixture-setup.sh <dest-dir> [gc-config entries...]
+# Each extra argument becomes a line of <dest-dir>/gc-config.txt: a bare word is a weekday
+# (weekday=<word>), anything containing "=" is written as-is (e.g. bundle_cap=450). Omit them
+# for the default fixture (no config file).
 set -eu
 SRC="$(cd "$(dirname "$0")/fixture-memory" && pwd)"
-DEST="${1:?usage: fixture-setup.sh <dest-dir> [gc-weekday]}"
-WEEKDAY="${2:-}"
+DEST="${1:?usage: fixture-setup.sh <dest-dir> [gc-config entries...]}"
+shift
 mkdir -p "$DEST"
 cp -r "$SRC"/. "$DEST"/
-if [ -n "$WEEKDAY" ]; then
-  printf '# memory-gc per-project config\nweekday=%s\n' "$WEEKDAY" > "$DEST/gc-config.txt"
+if [ "$#" -gt 0 ]; then
+  printf '# memory-gc per-project config\n' > "$DEST/gc-config.txt"
+  for entry in "$@"; do
+    case "$entry" in
+      *=*) printf '%s\n' "$entry" >> "$DEST/gc-config.txt" ;;
+      *)   printf 'weekday=%s\n' "$entry" >> "$DEST/gc-config.txt" ;;
+    esac
+  done
 else
   # A reused dest must come out identical to a fresh default stage — drop any stale config.
   rm -f "$DEST/gc-config.txt"

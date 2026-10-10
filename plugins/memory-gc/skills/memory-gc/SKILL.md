@@ -35,8 +35,9 @@ unrecoverable, so a person approves every mutation).
   proposing anything. Grep can nominate candidates; it cannot adjudicate them.
 - **Index lines stay lean**: English, one line per memory, under ~500 characters anywhere in the
   index. Durable lines are held to a tighter, lint-enforced 160 characters; bundle lines (link
-  title carries `(bundle)`, see Theme bundling) get 300. Exempt only when the link target is in
-  the Durable allowlist (which includes the gc log by default). Active/Backlog lines are not
+  title carries `(bundle)`, see Theme bundling) get the bundle cap — 300 by default,
+  `bundle_cap=` in `gc-config.txt` overrides it (see Step 6). Exempt only when the link target
+  is in the Durable allowlist (which includes the gc log by default). Active/Backlog lines are not
   length-checked. Running
   history belongs in the memory body; if an index line has grown into a changelog, first confirm
   the body contains the details (append them if not), then condense the line.
@@ -126,9 +127,12 @@ TTL guidelines (from the maintenance plan):
   - **PROMOTE** → nominate for promote-knowledge (see triage table).
   - **MERGE** → fold into a sibling or theme bundle.
   - **ARCHIVE** → no longer true or no longer worth its index line.
-- Index line over its lint cap (160 chars, or 300 for a `(bundle)` line): UPDATE — rewrite the
-  line (a bundle line becomes a keyword hook, see Theme bundling) after confirming every fact
-  dropped from the line is in the body. Lint reports these aggregated; one UPDATE row per file.
+- Index line over its lint cap (160 chars, or the bundle cap for a `(bundle)` line): UPDATE —
+  rewrite the line (a bundle line becomes a keyword hook, see Theme bundling) after confirming
+  every fact dropped from the line is in the body. Lint reports these aggregated; one UPDATE row
+  per file. Exception: a bundle line that already *is* a keyword hook (no sentences, dates or
+  history left to drop) and is still over the cap is not a line problem but a cap problem —
+  propose raising `bundle_cap=` in `gc-config.txt` instead (Theme bundling explains why).
 - Dated work-log memories: always ARCHIVE candidates.
 
 ### Step 3 — Lesson extraction (before archiving)
@@ -177,18 +181,23 @@ The index line must carry both dates — the SessionStart hook and other session
 ```
 
 next due = the next occurrence of the gc weekday after the run date. The gc weekday defaults
-to Monday; an optional `<memory-dir>/gc-config.txt` overrides it:
+to Monday; an optional `<memory-dir>/gc-config.txt` overrides it, and the same file holds the
+two per-project size knobs that lint.sh reads:
 
 ```text
 # memory-gc per-project config
 weekday=Friday
+bundle_cap=600      # default 300 — cap for "(bundle)" Durable index lines (lint check 7)
+durable_budget=60   # default 45 — Durable entry budget (lint check 5)
 ```
 
-With the file or the `weekday=` key absent, behavior is unchanged (Monday). The weekday word
-in the index line ("Mondays") follows the configured day so the line stays self-describing.
-Like `durable-allowlist.txt` (ground rules), this is per-project data in a deliberately
-non-`.md` file, keeping it out of the memory scans and recall; lint.sh needs no change — it
-compares dates only.
+With the file or a key absent, behavior is unchanged (Monday / 300 / 45); a value that is not
+a positive integer is ignored. The whole-file byte threshold (lint check 6) is deliberately not
+configurable — it is the real limit the other two approximate. The weekday word in the index
+line ("Mondays") follows the configured day so the line stays self-describing. Like
+`durable-allowlist.txt` (ground rules), this is per-project data in a deliberately non-`.md`
+file, keeping it out of the memory scans and recall. Change a knob only with the user's OK, and
+record the new value and the reason in the gc log body.
 
 In the body, append one line per run:
 `YYYY-MM-DD: archived N, extracted M lessons, nominated P for promotion, index X lines / Y KB (was X'/Y'). Notes: ...`
@@ -202,7 +211,7 @@ the next promote-knowledge run, and that run may happen in a different session.
 # Memory Index
 ## Active — in-progress work                                 ≤22 entries
 ## Backlog & ideas — not started / on hold                   ≤10 entries
-## Durable — evaluations / lessons / feedback / reference    ≤45 entries
+## Durable — evaluations / lessons / feedback / reference    ≤45 entries (durable_budget=)
 ## Archived
 - Completed items live in [archive/](archive/INDEX.md) — not auto-loaded.
 ```
@@ -238,11 +247,23 @@ A bundle line keeps those trigger words as a **keyword list**, not as a compress
 bodies: topic terms and identifiers separated by semicolons — no sentences, dates, explanations
 or running history (those live in the bundle body). An identifier that is itself a trigger word
 (a flag name, a constant, a version) stays. Mark bundle lines by putting
-`(bundle)` in the link title; lint holds them to 300 characters instead of 160 (a faithful
-5-memory keyword list measures ≈220). A bundle line over the cap has turned into a body copy:
-propose an UPDATE row that rewrites it as a keyword hook, after confirming every fact dropped
-from the line is in the body. Shortening a bundle line by moving its trigger words into
-`description:` is NOT a fix — it removes them from the only recall surface.
+`(bundle)` in the link title; lint holds them to the bundle cap instead of 160 — 300 by
+default, which fits a faithful keyword list for 3–5 absorbed memories (≈220 chars). A bundle
+line over the cap is one of two things, and the body tells you which:
+
+- It still carries sentences, dates, values or history → it has turned into a body copy.
+  Propose an UPDATE row that rewrites it as a keyword hook, after confirming every fact dropped
+  from the line is in the body.
+- It already is a keyword hook and is over the cap only because it absorbed more memories than
+  the default assumes (a real index seen 2026-10-10 bundled 6–22 facts per line; 13 of its 17
+  faithful hooks measured 304–567 chars) → the cap is wrong for this project, not the line.
+  Propose setting `bundle_cap=` in `gc-config.txt` (Step 6) to a value the longest faithful
+  hook fits under. The line cap and the Durable entry budget are proxies; the whole-file byte
+  threshold is the real limit and stays fixed, so raising the cap is safe while the index is
+  under it. Dropping trigger words to fit is NOT a fix — each one is a lost recall path — and
+  neither is moving them into `description:`, which removes them from the only recall surface.
+  Splitting an oversized bundle into two themes is fine when it reads better; if that pushes
+  Durable past its entry budget, `durable_budget=` is the matching knob.
 
 Propose each bundling as MERGE rows in the triage table (one row per absorbed memory) and apply
 only after approval. Mechanics follow "move, never delete": write the new bundle file (one

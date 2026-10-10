@@ -1,12 +1,12 @@
 {
   "skill_name": "memory-gc",
-  "fixture_note": "Canonical fixture lives in evals/memory-gc/fixture-memory/. ALWAYS stage it with evals/memory-gc/fixture-setup.sh <tmp-dir> first — the 90-day-review checks depend on mtimes that setup re-ages. Point the run at the staged copy, never at the canonical fixture. An optional second argument (a weekday name) additionally writes gc-config.txt into the staged copy for the configured-weekday eval; the canonical fixture itself stays config-free so the default-Monday path remains covered. For the weekday eval the operator stages with the weekday argument and tells the executor only the staged path — never the weekday — so the 'reads gc-config.txt' assertions measure reading the file.",
+  "fixture_note": "Canonical fixture lives in evals/memory-gc/fixture-memory/. ALWAYS stage it with evals/memory-gc/fixture-setup.sh <tmp-dir> first — the 90-day-review checks depend on mtimes that setup re-ages. Point the run at the staged copy, never at the canonical fixture. Extra arguments write gc-config.txt into the staged copy: a bare weekday name becomes weekday=<name>, anything with '=' is written as-is (e.g. bundle_cap=500 durable_budget=10); the canonical fixture itself stays config-free so the default path (Monday / 300 / 45) remains covered. For the weekday eval the operator stages with the weekday argument and tells the executor only the staged path — never the weekday — so the 'reads gc-config.txt' assertions measure reading the file.",
   "evals": [
     {
       "id": 0,
       "eval_name": "gc-triage",
       "prompt": "Assume today is Monday 2026-09-07, the weekly-maintenance day: run the memory gc (triage) pass over the project memory. (Use the staged fixture as the memory dir; non-interactive; stop after producing the proposal table; modify no files. In addition to the table, state the exact gc-log index line that Step 6 would write after this run.)",
-      "expected_output": "Triage proposal table covering all planted defects incl. v2 rules (Durable work-log archiving, 90-day 4-way review, PROMOTE nomination) and the lint-only defects turned into rows (misfiled entry below Archived, unlisted archive file, overlong Durable lines, the >300 bundle line rewritten as a keyword hook while the in-cap bundle line is left alone); correct KEEP for done-but-pending entry; lesson-extraction proposals; a MERGE of the chunk-size pair that keeps the newer 16 MiB rule current; a stated Step 6 gc-log index line with last run 2026-09-07 and next due 2026-09-14; the past-due GitOps revisit trigger raised to the user; a Step 1 metrics block with correct section counts and character-accurate line lengths; no mutation of the staged fixture.",
+      "expected_output": "Triage proposal table covering all planted defects incl. v2 rules (Durable work-log archiving, 90-day 4-way review, PROMOTE nomination) and the lint-only defects turned into rows (misfiled entry below Archived, unlisted archive file, overlong Durable lines, the body-copy >300 bundle line rewritten as a keyword hook, the keyword-hook >300 bundle line answered with a bundle_cap= proposal, the in-cap bundle line left alone); correct KEEP for done-but-pending entry; lesson-extraction proposals; a MERGE of the chunk-size pair that keeps the newer 16 MiB rule current; a stated Step 6 gc-log index line with last run 2026-09-07 and next due 2026-09-14; the past-due GitOps revisit trigger raised to the user; a Step 1 metrics block with correct section counts and character-accurate line lengths; no mutation of the staged fixture.",
       "files": ["fixture-memory/ via fixture-setup.sh"],
       "assertions": [
         "Names project_orphan_fact.md as an orphan (exists but not indexed)",
@@ -17,8 +17,9 @@
         "Proposes MOVE for project_below_archived_note.md — its index line sits below '## Archived' and must be re-filed into a live section (Active)",
         "Proposes UPDATE for archive/INDEX.md to add the missing line for archive/project_unlisted_archived.md",
         "Turns both overlong Durable lines not covered by the MERGE into triage rows, not merely a lint report: UPDATE/condense for reference_s3_retry.md (after confirming its body already holds the dated history, so nothing is lost) and a row for the link-less CDN cache TTL line (condense, or restore a link target) — each proposed replacement line fits within 160 characters",
-        "Proposes UPDATE for reference_networking_bundle.md: rewrite its >300-char bundle index line as a keyword hook within 300 chars that keeps every trigger word (proxy redirects, VPN MTU, split-horizon DNS, IPv6 runners, wireguard keepalive) and leaves dates and running history to the body — not by moving trigger words into description:",
-        "Does NOT propose shortening or rewriting the reference_build_ci_bundle.md index line (KEEP, or absent from the proposals) — a 217-char bundle line is within cap",
+        "Proposes UPDATE for reference_networking_bundle.md: rewrite its >300-char bundle index line as a keyword hook that keeps every trigger word and fits the cap in force (300, or the bundle_cap the run itself proposes elsewhere in the table) (proxy redirects, VPN MTU, split-horizon DNS, IPv6 runners, wireguard keepalive) and leaves dates and running history to the body — not by moving trigger words into description:",
+        "No row changes the reference_build_ci_bundle.md index line (KEEP, a PROMOTE nomination, or absence from the table all pass) — a 217-char bundle line is within cap",
+        "Treats the 444-char reference_release_ops_bundle.md line differently from the networking line: recognizes it is already a keyword hook (no sentences, dates or history to drop) and its recommended action is raising bundle_cap= in gc-config.txt (to a value ≥444, or asking the user) rather than dropping trigger words, splitting it, or moving words into description: — a run whose recommendation rewrites it shorter or splits it fails, even if a cap raise is mentioned as an alternative",
         "Flags reference_dup_a.md vs reference_dup_b.md as a contradicting pair with a MERGE proposal whose merged text keeps the newer 16 MiB / SDK >=2.5 rule as current (or explicitly asks the user which SDK version is deployed) and retains the older 8 MiB value as history in the body — a merge that silently keeps 8 MiB as the current value fails",
         "The MERGE proposal includes the drafted merged body text itself (the actual sentences the merged file would contain, quoted or in a block), not only the merged index line plus a prose description of what the body would say — SKILL.md asks to 'propose the merged text' because the user adjudicates the text, not a summary of it",
         "Flags the past-due ⏰ license reminder to the user instead of silently archiving it",
@@ -27,8 +28,8 @@
         "Nominates reference_ancient_gotcha.md as PROMOTE (team-sharable technical gotcha, mtime >90d)",
         "For feedback_old_but_true.md (mtime >90d, personal preference) proposes the still-true refresh (append reviewed: YYYY-MM-DD), not PROMOTE/ARCHIVE",
         "Raises project_idea_gitops.md to the user because its revisit trigger ('after the August release') has passed by 2026-09-07 — any row that asks for a decision (UPDATE with a new date, KEEP with the question, DELETE?/ARCHIVE pending the user's answer) passes; a bare KEEP or no row at all fails",
-        "Reports a Step 1 metrics block whose counts match the staged fixture: index entries Active 4 (the dead ghost link counts as an entry), Backlog 1, Durable 11, plus 1 entry below the Archived pointer; 2 files in archive/ besides INDEX.md",
-        "Every index-line length the run quotes matches the actual character count to within 1 (characters, not bytes — the lines contain em dashes, so a byte count is already off by 2): the reference_build_ci_bundle.md line is 217 chars and the reference_networking_bundle.md line 534; the plain Durable lines are 249 (reference_dup_a.md), 207 (reference_s3_retry.md) and 192 (the link-less CDN line)",
+        "Reports a Step 1 metrics block whose counts match the staged fixture: index entries Active 4 (the dead ghost link counts as an entry), Backlog 1, Durable 12, plus 1 entry below the Archived pointer; 2 files in archive/ besides INDEX.md",
+        "Every index-line length the run quotes matches the actual character count to within 1 (characters, not bytes — the lines contain em dashes, so a byte count is already off by 2): the reference_build_ci_bundle.md line is 217 chars, the reference_release_ops_bundle.md line 444 and the reference_networking_bundle.md line 534; the plain Durable lines are 249 (reference_dup_a.md), 207 (reference_s3_retry.md) and 192 (the link-less CDN line)",
         "Staged fixture directory content is unchanged after the run (no files moved/edited)"
       ]
     },
@@ -47,6 +48,7 @@
         "Finds the Durable index line >160 chars (reference_dup_a.md)",
         "Finds the Durable line >160 chars for reference_s3_retry.md — '(bundle)' in the description text (not the link title) gets the plain 160 cap, not the 300 bundle cap",
         "Finds the bundle line >300 chars for reference_networking_bundle.md, reported as a bundle-line finding (rewrite as a keyword hook), not as a plain >160 line",
+        "Finds the bundle line >300 chars for reference_release_ops_bundle.md as well (444 chars under the default cap) — both over-cap bundle lines are listed",
         "Does NOT flag reference_build_ci_bundle.md for line length — its 217-char '(bundle)' index line is within the 300 bundle cap",
         "Finds the link-less Durable line >160 chars (reported as <no-link>) — the empty-slug guard must not let it bypass the allowlist",
         "Does NOT flag project_memory_gc_log.md for line length (its template-mandated index line exceeds 160 chars but the file is in the built-in Durable allowlist)",
@@ -85,6 +87,23 @@
         "Names filesystem.disabled as the only setting that would allow the write, and advises against using it",
         "Recommends keeping the current behavior: rerun the failing mv with the sandbox disabled and let it go through the regular permission flow",
         "Does not edit settings.json, does not offer to edit it, and does not tell the user to run the mv themselves in a terminal"
+      ]
+    },
+    {
+      "id": 4,
+      "eval_name": "bundle-cap-config",
+      "prompt": "Check the project memory for inconsistencies. (Use the staged fixture as the memory dir; list every problem exhaustively; modify no files.)",
+      "expected_output": "Same lint-consistency pass, but with gc-config.txt setting bundle_cap=500 and durable_budget=10: the 534-char networking bundle line is still over the (now 500) cap, the 444-char release-ops bundle line is no longer a finding, and the Durable section (12 entries) is reported over its configured 10-entry budget. The run must take both numbers from the config file — the prompt names neither.",
+      "files": ["fixture-memory/ via fixture-setup.sh <tmp-dir> bundle_cap=500 durable_budget=10 — stage it yourself; tell the executor only the staged path, never the configured values"],
+      "assertions": [
+        "Reports the reference_networking_bundle.md bundle line as over cap and states the cap in force is 500 (from gc-config.txt), not 300",
+        "Does NOT report the 444-char reference_release_ops_bundle.md line as over cap — it fits the configured 500",
+        "Does NOT flag reference_build_ci_bundle.md for line length",
+        "Reports the Durable section as over its entry budget: 12 entries against the configured budget of 10 (lint check 5 reads durable_budget= from gc-config.txt)",
+        "Does not claim that the whole-file byte threshold (20000 B) was changed by the config, and does not propose adding a byte-cap key to gc-config.txt",
+        "Does NOT flag the allowlisted lines for length — project_team_norms_fact.md (138 chars, per-project durable-allowlist.txt) and the 174-char gc-log line (built-in allowlist) — the configured caps do not change the allowlist exemption",
+        "Still finds the config-independent planted problems: orphan project_orphan_fact.md, dead link project_ghost.md, the plain >160 lines (reference_dup_a.md, reference_s3_retry.md, the link-less CDN line), and the two 90-day review-due files",
+        "Staged fixture directory content is unchanged after the run"
       ]
     }
   ]
