@@ -80,7 +80,7 @@ DURABLE_BUDGET=45
 cfg_int() {   # cfg_int <key> <default> — last matching "key=value" line wins; "# ..." comments
   v=$(awk -F= -v k="$1" '{sub(/\r$/,""); sub(/#.*/,"")} NF < 2 {next}   # (inline too) are dropped
         { key=$1; gsub(/[[:space:]]/,"",key); val=$2; gsub(/[[:space:]]/,"",val) }
-        key==k && val ~ /^[0-9]+$/ && length(val) <= 9 && val+0 > 0 {out=val} END {print out}' gc-config.txt 2>/dev/null)
+        NF==2 && key==k && val ~ /^[0-9]+$/ && length(val) <= 9 && val+0 > 0 {out=val} END {print out}' gc-config.txt 2>/dev/null)
   printf '%s\n' "${v:-$2}"
 }
 if [ -f gc-config.txt ]; then
