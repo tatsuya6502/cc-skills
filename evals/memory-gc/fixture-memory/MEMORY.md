@@ -20,6 +20,8 @@
 - [k8s ingress build log](project_worklog_in_durable.md) — work log of the 2026-04 ingress build.
 - [Registry mirror gotcha](reference_ancient_gotcha.md) — registry mirror needs explicit SNI or the TLS handshake fails.
 - [Terse commit feedback](feedback_old_but_true.md) — The user prefers commit bodies under 5 lines.
+- [Build & CI gotchas (bundle)](reference_build_ci_bundle.md) — cargo nextest flaky-retry flag; sccache S3 bucket region; GitHub Actions macOS runner PATH; docker buildx cache-to mode=max; Gradle daemon JVM heap on CI
+- [Networking lessons (bundle)](reference_networking_bundle.md) — corporate proxy strips the Proxy-Authorization header on redirects (2026-02-14, re-confirmed 2026-04-03 after the proxy upgrade), so pin the mirror URL; MTU must be 1400 on the VPN or large multipart uploads stall at 97 %; split-horizon DNS returns the internal IP for *.corp only when the resolver is 10.0.0.53, TTL lowered to 60 s on 2026-05-19; IPv6 disabled on the build runners since the 2026-03 outage; wireguard keepalive 25 s or NAT drops the tunnel after idle
 - [Review shifts](project_team_norms_fact.md) — two review shifts; ping reviewers only during their shift (allowlisted team-process fact).
 - [memory-gc log](project_memory_gc_log.md) — Weekly gc (Mondays, manual). last run: 2026-06-30; next due: 2026-07-06. If today > next due, remind the user to run /memory-gc.
 

@@ -15,7 +15,8 @@ the rows you approve.
 A weekly "gardening" pass over the project memory:
 
 1. **Lint** — mechanical consistency checks (`scripts/lint.sh`): dead/orphan index links,
-   per-section entry budgets, overlong Durable lines, work-log memories parked in Durable,
+   per-section entry budgets, overlong Durable lines (160 chars; 300 for `(bundle)` lines),
+   work-log memories parked in Durable,
    90-day review-due bodies, overdue gc runs and ⏰ reminders.
 2. **Triage** — every index entry is classified (ARCHIVE / MOVE / MERGE / UPDATE / PROMOTE /
    DELETE? / KEEP) with the body read before any proposal.

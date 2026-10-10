@@ -34,9 +34,10 @@ unrecoverable, so a person approves every mutation).
   "✅ done + remaining PR/prod-apply" or carried durable warnings. Always read the body before
   proposing anything. Grep can nominate candidates; it cannot adjudicate them.
 - **Index lines stay lean**: English, one line per memory, under ~500 characters anywhere in the
-  index. Durable lines are held to a tighter, lint-enforced 160 characters — exempt only when the
-  link title carries `(bundle)` or the link target is in the Durable allowlist (which includes the
-  gc log by default). Active/Backlog lines are not length-checked. Running
+  index. Durable lines are held to a tighter, lint-enforced 160 characters; bundle lines (link
+  title carries `(bundle)`, see Theme bundling) get 300. Exempt only when the link target is in
+  the Durable allowlist (which includes the gc log by default). Active/Backlog lines are not
+  length-checked. Running
   history belongs in the memory body; if an index line has grown into a changelog, first confirm
   the body contains the details (append them if not), then condense the line.
 - **Durable is not a work-log shelf.** A `project_*` memory may sit in Durable only when it
@@ -125,6 +126,9 @@ TTL guidelines (from the maintenance plan):
   - **PROMOTE** → nominate for promote-knowledge (see triage table).
   - **MERGE** → fold into a sibling or theme bundle.
   - **ARCHIVE** → no longer true or no longer worth its index line.
+- Index line over its lint cap (160 chars, or 300 for a `(bundle)` line): UPDATE — rewrite the
+  line (a bundle line becomes a keyword hook, see Theme bundling) after confirming every fact
+  dropped from the line is in the body. Lint reports these aggregated; one UPDATE row per file.
 - Dated work-log memories: always ARCHIVE candidates.
 
 ### Step 3 — Lesson extraction (before archiving)
@@ -207,27 +211,40 @@ Every entry belongs to exactly one section; nothing below the Archived pointer. 
 lines may contain "next actions". New memories written by other sessions often get appended to
 the bottom of the file — lint flags these; re-file them into the right section.
 
-The per-section budgets are the primary size signal (lint enforces them); the whole-file
-line/byte thresholds are auxiliary. The index is loaded into every session, so each line is a
-recurring token cost — a line has to earn its keep.
+The per-section budgets and the whole-file byte threshold are the primary size signals (lint
+enforces both); the line count is auxiliary. On a mature index it is bytes, not entry count,
+that hit the harness's read limit, and overlong bundle lines are the usual byte consumer. The
+index is loaded into every session, so each line is a recurring token cost — a line has to earn
+its keep.
 
 ### Theme bundling (Durable)
 
-Recall reads **only MEMORY.md**. Verified experimentally 2026-08-16: a planted memory file with
-a near-verbatim `description:` was never recalled while unindexed. (Harness-version-dependent —
-if the recall mechanism changes, re-verify before relying on this.) Two consequences:
+Recall reads **only MEMORY.md**. Verified experimentally 2026-08-16 and re-verified 2026-10-10
+(Claude Code 2.1.296): a planted memory file with a unique trigger word in its `description:`
+was never recalled while unindexed — in the 2026-10-10 run the new session found it only because
+the lint hook's orphan warning named the file and the model then grepped for it. The harness's
+own memory instructions describe `description:` as an input to recall, but that was not
+observed, so do not rely on it. (Harness-version-dependent — if the recall mechanism changes,
+re-verify before relying on this.) Two consequences:
 
 - A memory dropped from the index is effectively lost. Never split the index into hot/cold
   tiers — the "cold" tier would be invisible.
 - Several single-fact Durable lines on one theme can be bundled into ONE themed file with ONE
   index line. This is safe **only if the index line keeps every trigger word** from the lines it
   replaces: the index line is the sole recall surface, so a dropped keyword is a lost recall
-  path. Bundle lines therefore run long by design.
+  path.
 
-Mark bundle lines by putting `(bundle)` in the link title — lint exempts such lines from the
-160-char length check. Propose each bundling as MERGE rows in the triage table (one row per
-absorbed memory) and apply only after approval. Mechanics follow "move, never delete": write the
-new bundle file (one theme, full bodies merged, `[[old-name]]` back-links kept), then `mv` the
-absorbed originals into `archive/` with INDEX.md lines noting "merged into <bundle>". Sizing
-guideline from a real 2026-08-16 pass: bundles of 3–5 same-theme lines each collapsed ≈19 index
-lines into 5.
+A bundle line keeps those trigger words as a **keyword list**, not as a compressed copy of the
+bodies: topic terms and identifiers separated by semicolons — no sentences, dates, measured
+values or running history (those live in the bundle body). Mark bundle lines by putting
+`(bundle)` in the link title; lint holds them to 300 characters instead of 160 (a faithful
+5-memory keyword list measures ≈220). A bundle line over the cap has turned into a body copy:
+propose an UPDATE row that rewrites it as a keyword hook, after confirming every fact dropped
+from the line is in the body. Shortening a bundle line by moving its trigger words into
+`description:` is NOT a fix — it removes them from the only recall surface.
+
+Propose each bundling as MERGE rows in the triage table (one row per absorbed memory) and apply
+only after approval. Mechanics follow "move, never delete": write the new bundle file (one
+theme, full bodies merged, `[[old-name]]` back-links kept), then `mv` the absorbed originals
+into `archive/` with INDEX.md lines noting "merged into <bundle>". Sizing guideline from a real
+2026-08-16 pass: bundles of 3–5 same-theme lines each collapsed ≈19 index lines into 5.
