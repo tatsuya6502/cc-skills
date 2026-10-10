@@ -15,7 +15,7 @@ the rows you approve.
 A weekly "gardening" pass over the project memory:
 
 1. **Lint** — mechanical consistency checks (`scripts/lint.sh`): dead/orphan index links,
-   per-section entry budgets, overlong Durable lines (160 chars; 300 for `(bundle)` lines),
+   per-section entry budgets, overlong Durable lines (160 chars; 300 for `(bundle)` lines, configurable),
    work-log memories parked in Durable,
    90-day review-due bodies, overdue gc runs and ⏰ reminders.
 2. **Triage** — every index entry is classified (ARCHIVE / MOVE / MERGE / UPDATE / PROMOTE /
@@ -60,16 +60,21 @@ exits 0 and never blocks a session.
 your team or its processes work. `lint.sh` itself only knows the universal
 `project_memory_gc_log.md` default.
 
-`<memory-dir>/gc-config.txt` (optional) moves the weekly gc off its default Monday:
+`<memory-dir>/gc-config.txt` (optional) moves the weekly gc off its default Monday and sizes
+two lint checks for your index:
 
 ```text
 # memory-gc per-project config
 weekday=Friday
+bundle_cap=600      # default 300 — cap for "(bundle)" Durable index lines
+durable_budget=60   # default 45 — Durable entry budget
 ```
 
-With the file or the `weekday=` key absent, the cadence stays on Monday. A gc run writes
+With the file or a key absent, the defaults apply (Monday / 300 / 45). A gc run writes
 `next due` as the next occurrence of the configured day and names that day in the gc-log
-index line. Both files are deliberately non-`.md` so they stay out of memory scans and
+index line. Raise `bundle_cap` when your bundle lines are faithful keyword lists that absorb
+more memories than the default assumes (3–5); the whole-file byte threshold stays fixed
+either way. Both files are deliberately non-`.md` so they stay out of memory scans and
 recall.
 
 ## Sandbox behavior
