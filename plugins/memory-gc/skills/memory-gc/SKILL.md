@@ -235,8 +235,9 @@ re-verify before relying on this.) Two consequences:
   path.
 
 A bundle line keeps those trigger words as a **keyword list**, not as a compressed copy of the
-bodies: topic terms and identifiers separated by semicolons — no sentences, dates, measured
-values or running history (those live in the bundle body). Mark bundle lines by putting
+bodies: topic terms and identifiers separated by semicolons — no sentences, dates, explanations
+or running history (those live in the bundle body). An identifier that is itself a trigger word
+(a flag name, a constant, a version) stays. Mark bundle lines by putting
 `(bundle)` in the link title; lint holds them to 300 characters instead of 160 (a faithful
 5-memory keyword list measures ≈220). A bundle line over the cap has turned into a body copy:
 propose an UPDATE row that rewrites it as a keyword hook, after confirming every fact dropped

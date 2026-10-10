@@ -17,7 +17,7 @@
         "Proposes MOVE for project_below_archived_note.md — its index line sits below '## Archived' and must be re-filed into a live section (Active)",
         "Proposes UPDATE for archive/INDEX.md to add the missing line for archive/project_unlisted_archived.md",
         "Turns both overlong Durable lines not covered by the MERGE into triage rows, not merely a lint report: UPDATE/condense for reference_s3_retry.md (after confirming its body already holds the dated history, so nothing is lost) and a row for the link-less CDN cache TTL line (condense, or restore a link target) — each proposed replacement line fits within 160 characters",
-        "Proposes UPDATE for reference_networking_bundle.md: rewrite its >300-char bundle index line as a keyword hook within 300 chars that keeps every trigger word (proxy redirects, VPN MTU, split-horizon DNS, IPv6 runners, wireguard keepalive) and leaves dates/values/history to the body — not by moving trigger words into description:",
+        "Proposes UPDATE for reference_networking_bundle.md: rewrite its >300-char bundle index line as a keyword hook within 300 chars that keeps every trigger word (proxy redirects, VPN MTU, split-horizon DNS, IPv6 runners, wireguard keepalive) and leaves dates and running history to the body — not by moving trigger words into description:",
         "Does NOT propose shortening or rewriting the reference_build_ci_bundle.md index line (KEEP, or absent from the proposals) — a 217-char bundle line is within cap",
         "Flags reference_dup_a.md vs reference_dup_b.md as a contradicting pair with a MERGE proposal whose merged text keeps the newer 16 MiB / SDK >=2.5 rule as current (or explicitly asks the user which SDK version is deployed) and retains the older 8 MiB value as history in the body — a merge that silently keeps 8 MiB as the current value fails",
         "Flags the past-due ⏰ license reminder to the user instead of silently archiving it",
@@ -44,11 +44,11 @@
         "Finds the Durable index line >160 chars (reference_dup_a.md)",
         "Finds the Durable line >160 chars for reference_s3_retry.md — '(bundle)' in the description text (not the link title) gets the plain 160 cap, not the 300 bundle cap",
         "Finds the bundle line >300 chars for reference_networking_bundle.md, reported as a bundle-line finding (rewrite as a keyword hook), not as a plain >160 line",
-        "Does NOT flag reference_build_ci_bundle.md — its 217-char '(bundle)' index line is within the 300 bundle cap",
+        "Does NOT flag reference_build_ci_bundle.md for line length — its 217-char '(bundle)' index line is within the 300 bundle cap",
         "Finds the link-less Durable line >160 chars (reported as <no-link>) — the empty-slug guard must not let it bypass the allowlist",
         "Does NOT flag project_memory_gc_log.md for line length (its template-mandated index line exceeds 160 chars but the file is in the built-in Durable allowlist)",
         "Finds the work-log project_* resident in Durable (project_worklog_in_durable.md, not project_memory_gc_log.md)",
-        "Does NOT flag project_team_norms_fact.md (exempted via the per-project durable-allowlist.txt)",
+        "Does NOT flag project_team_norms_fact.md for Durable placement (exempted via the per-project durable-allowlist.txt)",
         "Finds the two 90-day review-due files (reference_ancient_gotcha.md, feedback_old_but_true.md)",
         "Staged fixture directory content is unchanged after the run"
       ]
