@@ -5,8 +5,8 @@
     {
       "id": 0,
       "eval_name": "gc-triage",
-      "prompt": "Assume today is the Monday weekly-maintenance day: run the memory gc (triage) pass over the project memory. (Use the staged fixture as the memory dir; non-interactive; stop after producing the proposal table; modify no files.)",
-      "expected_output": "Triage proposal table covering all planted defects incl. v2 rules (Durable work-log archiving, 90-day 4-way review, PROMOTE nomination); correct KEEP for done-but-pending entry; lesson-extraction proposals; no mutation of the staged fixture.",
+      "prompt": "Assume today is Monday 2026-09-07, the weekly-maintenance day: run the memory gc (triage) pass over the project memory. (Use the staged fixture as the memory dir; non-interactive; stop after producing the proposal table; modify no files. In addition to the table, state the exact gc-log index line that Step 6 would write after this run.)",
+      "expected_output": "Triage proposal table covering all planted defects incl. v2 rules (Durable work-log archiving, 90-day 4-way review, PROMOTE nomination) and the lint-only defects turned into rows (misfiled entry below Archived, unlisted archive file, overlong Durable lines); correct KEEP for done-but-pending entry; lesson-extraction proposals; a MERGE of the chunk-size pair that keeps the newer 16 MiB rule current; a stated Step 6 gc-log index line with last run 2026-09-07 and next due 2026-09-14; no mutation of the staged fixture.",
       "files": ["fixture-memory/ via fixture-setup.sh"],
       "assertions": [
         "Names project_orphan_fact.md as an orphan (exists but not indexed)",
@@ -14,12 +14,16 @@
         "Proposes ARCHIVE for project_done_old_bug.md (fully done 2026-06-20, nothing pending)",
         "Proposes extracting the regen-certs ⚠️ lesson from project_done_old_bug.md before archiving",
         "Does NOT propose ARCHIVE for project_done_but_pending_pr.md (recognizes pending PR + prod apply despite the ✅ marker)",
-        "Flags reference_dup_a.md vs reference_dup_b.md as duplicates/contradiction with a MERGE proposal",
+        "Proposes MOVE for project_below_archived_note.md — its index line sits below '## Archived' and must be re-filed into a live section (Active)",
+        "Proposes UPDATE for archive/INDEX.md to add the missing line for archive/project_unlisted_archived.md",
+        "Turns both overlong Durable lines not covered by the MERGE into triage rows, not merely a lint report: UPDATE/condense for reference_s3_retry.md (after confirming its body already holds the dated history, so nothing is lost) and a row for the link-less CDN cache TTL line (condense, or restore a link target) — each proposed replacement line fits within 160 characters",
+        "Flags reference_dup_a.md vs reference_dup_b.md as a contradicting pair with a MERGE proposal whose merged text keeps the newer 16 MiB / SDK >=2.5 rule as current (or explicitly asks the user which SDK version is deployed) and retains the older 8 MiB value as history in the body — a merge that silently keeps 8 MiB as the current value fails",
         "Flags the past-due ⏰ license reminder to the user instead of silently archiving it",
         "Proposes lesson extraction + ARCHIVE (not KEEP/demote) for project_worklog_in_durable.md — work-log project_* may not stay in Durable",
         "Does NOT propose ARCHIVE/demote for project_team_norms_fact.md (team-process fact exempted via the per-project durable-allowlist.txt)",
         "Nominates reference_ancient_gotcha.md as PROMOTE (team-sharable technical gotcha, mtime >90d)",
         "For feedback_old_but_true.md (mtime >90d, personal preference) proposes the still-true refresh (append reviewed: YYYY-MM-DD), not PROMOTE/ARCHIVE",
+        "The stated Step 6 gc-log index line reads '(Mondays, manual)' with last run 2026-09-07 and next due 2026-09-14 — the Monday after the pinned run date",
         "Staged fixture directory content is unchanged after the run (no files moved/edited)"
       ]
     },
