@@ -18,9 +18,9 @@ else
 fi
 # 90-day-review candidates: one team-sharable gotcha (expect PROMOTE nomination),
 # one personal-preference feedback (expect "still true → reviewed:" refresh).
-# GNU touch first; BSD (macOS) fallback computes the timestamp via date -v.
-if ! touch -d '120 days ago' "$DEST/reference_ancient_gotcha.md" "$DEST/feedback_old_but_true.md" 2>/dev/null; then
-  ts=$(date -v-120d +%Y%m%d%H%M)
-  touch -t "$ts" "$DEST/reference_ancient_gotcha.md" "$DEST/feedback_old_but_true.md"
-fi
+# Absolute mtime (2026-05-01), not "N days ago": the gc-triage prompt pins its run date
+# (2026-09-07), so an executor reasoning from that date and lint.sh reasoning from the real
+# clock must both see these files as >90 days old, no matter when the suite is run.
+# touch -t takes the same [[CC]YY]MMDDhhmm on GNU and BSD.
+touch -t 202605010000 "$DEST/reference_ancient_gotcha.md" "$DEST/feedback_old_but_true.md"
 echo "fixture ready at $DEST"
