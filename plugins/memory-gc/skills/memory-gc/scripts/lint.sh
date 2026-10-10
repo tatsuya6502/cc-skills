@@ -73,13 +73,14 @@ fi
 #   bundle_cap=300      cap for "(bundle)" Durable lines (check 7); 300 assumes 3-5 absorbed
 #                       memories — an index whose bundles absorb 6-22 facts each needs more
 #   durable_budget=45   Durable entry budget (check 5)
-# Only positive integers are accepted; anything else leaves the default in place.
+# Only positive integers of at most 9 digits are accepted (larger values would overflow the
+# shell's `[ -gt ]`); anything else leaves the default in place.
 BUNDLE_CAP=300
 DURABLE_BUDGET=45
 cfg_int() {   # cfg_int <key> <default> — last matching "key=value" line wins; "# ..." comments
   v=$(awk -F= -v k="$1" '{sub(/\r$/,""); sub(/#.*/,"")} NF < 2 {next}   # (inline too) are dropped
         { key=$1; gsub(/[[:space:]]/,"",key); val=$2; gsub(/[[:space:]]/,"",val) }
-        key==k && val ~ /^[0-9]+$/ && val+0 > 0 {out=val} END {print out}' gc-config.txt 2>/dev/null)
+        key==k && val ~ /^[0-9]+$/ && length(val) <= 9 && val+0 > 0 {out=val} END {print out}' gc-config.txt 2>/dev/null)
   printf '%s\n' "${v:-$2}"
 }
 if [ -f gc-config.txt ]; then
